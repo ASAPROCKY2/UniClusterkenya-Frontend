@@ -1,9 +1,13 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 
 // ===== Public pages =====
 import Landingpage from "./Pages/Landingpage";
-import AboutPage from "./Pages/AboutPage"; // ✅ add this import
+import AboutPage from "./Pages/AboutPage";
+import Register from "./Pages/Auth/Register";
+import VerifyUser from "./Pages/Auth/VerifyUser"; 
+import Login from "./Pages/Auth/Login"; 
 
 function App() {
   return (
@@ -12,7 +16,12 @@ function App() {
         <Routes>
           {/* ===== PUBLIC ROUTES ===== */}
           <Route path="/" element={<Landingpage />} />
-          <Route path="/about" element={<AboutPage />} /> {/* ✅ new about route */}
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/register" element={<Register />} /> 
+          <Route path="/login" element={<Login />} /> {/* ✅ Login route added */}
+          
+          {/* ===== VERIFY USER ROUTE ===== */}
+          <Route path="/verify" element={<VerifyUser />} />
         </Routes>
       </BrowserRouter>
 

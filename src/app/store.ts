@@ -11,36 +11,50 @@ import {
   REGISTER,
 } from "redux-persist";
 
-// ✅ PROMISE-based storage wrapper
+import { userAPI } from "../Features/users/UsersApi";
+import { studentsAPI } from "../Features/students/StudentsApi";
+import { loginAPI } from "../Features/Login/LoginAPI"; 
+import userReducer from "../Features/Login/UserSlice"; 
+
+/* =============================
+   ASYNC STORAGE (PROMISE-BASED)
+============================= */
 const asyncLocalStorage = {
   getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),
   setItem: (key: string, value: string) =>
     Promise.resolve(localStorage.setItem(key, value)),
-  removeItem: (key: string) => Promise.resolve(localStorage.removeItem(key)),
+  removeItem: (key: string) =>
+    Promise.resolve(localStorage.removeItem(key)),
 };
 
-// -------------------------
-// VALID REDUCER
-// -------------------------
+/* =============================
+   ROOT REDUCER
+============================= */
 const rootReducer = combineReducers({
-  dummy: (state = {}) => state,
+  // 🔥 RTK Query APIs
+  [userAPI.reducerPath]: userAPI.reducer,
+  [studentsAPI.reducerPath]: studentsAPI.reducer,
+  [loginAPI.reducerPath]: loginAPI.reducer, // added here
+
+  // persistent slices
+  user: userReducer,
 });
 
-// -------------------------
-// PERSIST CONFIG
-// -------------------------
+/* =============================
+   PERSIST CONFIG
+============================= */
 const persistConfig = {
   key: "root",
   version: 1,
   storage: asyncLocalStorage,
-  whitelist: [], // no slices yet
+  whitelist: ["user"], // persist the user slice
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// -------------------------
-// STORE
-// -------------------------
+/* =============================
+   STORE
+============================= */
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -48,16 +62,21 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(
+      // 🔥 RTK Query middleware
+      userAPI.middleware,
+      studentsAPI.middleware,
+      loginAPI.middleware //  added here
+    ),
 });
 
-// -------------------------
-// PERSISTOR
-// -------------------------
+/* =============================
+   PERSISTOR
+============================= */
 export const persistedStore = persistStore(store);
 
-// -------------------------
-// TYPES
-// -------------------------
+/* =============================
+   TYPES
+============================= */
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

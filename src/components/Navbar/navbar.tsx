@@ -1,17 +1,38 @@
-import { Link } from "react-router-dom";
-import logo from "../../assets/images/logo.png"; // ✅ import logo
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import logo from "../../assets/images/logo.png";
+import { ArrowLeft } from "lucide-react"; // Import arrow icon
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
   return (
     <div className="navbar bg-base-100 shadow-sm px-4 lg:px-10">
       {/* ===== LEFT SIDE ===== */}
-      <div className="navbar-start">
+      <div className="navbar-start flex items-center">
+        {/* Back Button - Only show when not on homepage */}
+        {!isHomePage && (
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-ghost btn-circle btn-sm lg:btn-md mr-2 lg:mr-3 hover:bg-base-200 transition-all duration-300 group"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5 lg:h-6 lg:w-6 text-gray-600 group-hover:text-primary group-hover:-translate-x-1 transition-all duration-300" />
+            <span className="sr-only">Go back</span>
+          </button>
+        )}
+
+        {/* Mobile Menu */}
         <div className="dropdown">
-          {/* Hamburger (Mobile) */}
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+          <div
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost lg:hidden"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6" // slightly bigger hamburger icon
+              className="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -25,10 +46,9 @@ const Navbar = () => {
             </svg>
           </div>
 
-          {/* Mobile Dropdown Menu */}
           <ul
             tabIndex={-1}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow" // wider menu
+            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow"
           >
             <li>
               <Link to="/about">About</Link>
@@ -42,14 +62,17 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* LOGO */}
-        <Link to="/" className="btn btn-ghost normal-case text-2xl flex items-center">
+        {/* LOGO (FIXED — NO BUTTON STYLES) */}
+        <Link
+          to="/"
+          className="flex items-center gap-3 hover:opacity-90 transition"
+        >
           <img
-            src={logo} // ✅ imported logo
+            src={logo}
             alt="UniCluster Logo"
-            className="h-22 w-auto" // ✅ bigger logo (16 = 64px)
+            className="h-12 lg:h-14w-auto"
           />
-          <span className="ml-3 font-bold tracking-tight text-xl lg:text-2xl">
+          <span className="font-bold tracking-tight text-xl lg:text-2xl text-gray-900">
             UniCluster
           </span>
         </Link>
