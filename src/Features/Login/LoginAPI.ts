@@ -5,8 +5,6 @@ import { ApiDomain } from "../../utilis/APiDomain";
 /* =============================
    TYPES
 ============================= */
-
-// ✅ Response from backend after login
 export type TLoginResponse = {
   message: string;
   token: string;
@@ -16,15 +14,15 @@ export type TLoginResponse = {
     lastname: string;
     email: string;
     role: "student" | "university_admin" | "system_admin";
-    kcseIndex?: string;     // ✅ only exists for students
+    kcseIndex?: string;
     image_url?: string;
   };
 };
 
-// ✅ Login form inputs
 export type LoginInputs = {
   email: string;
   password: string;
+  kcseIndex?: string;
 };
 
 /* =============================
@@ -32,26 +30,28 @@ export type LoginInputs = {
 ============================= */
 export const loginAPI = createApi({
   reducerPath: "loginAPI",
+
   baseQuery: fetchBaseQuery({
-    baseUrl: ApiDomain,
+    baseUrl: ApiDomain, // MUST be something like http://localhost:5000/api
     prepareHeaders: (headers) => {
       headers.set("Content-Type", "application/json");
       return headers;
     },
   }),
-  tagTypes: ["Login"],
+
   endpoints: (builder) => ({
-    // 🔑 Login user
     loginUser: builder.mutation<TLoginResponse, LoginInputs>({
-      query: (loginData) => ({
-        url: "/auth/login", // ✅ matches backend route
+      query: ({ email, password, kcseIndex }) => ({
+        url: "auth/login", // ✅ no leading slash (important)
         method: "POST",
-        body: loginData,
+        body: {
+          email: email.trim(),
+          password,
+          ...(kcseIndex ? { kcseIndex: kcseIndex.trim() } : {}),
+        },
       }),
-      invalidatesTags: ["Login"],
     }),
   }),
 });
-
 
 export const { useLoginUserMutation } = loginAPI;

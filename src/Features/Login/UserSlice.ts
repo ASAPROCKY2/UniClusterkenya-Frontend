@@ -12,6 +12,7 @@ export type UserRole =
 export type User = {
   userID: number;               
   lastname: string;
+    firstname: string; 
   email: string;
   role: UserRole;
   kcseIndex?: string;           

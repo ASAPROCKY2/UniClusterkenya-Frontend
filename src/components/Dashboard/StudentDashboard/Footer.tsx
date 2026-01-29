@@ -1,15 +1,15 @@
 import { Link } from "react-router-dom";
-import logo from "../../assets/images/logo.png"; 
+import logo from "../../../assets/images/logo.png";
 
-const Footer = () => {
+const StudentFooter = () => {
   return (
     <footer className="footer sm:footer-horizontal bg-neutral text-neutral-content p-10">
       {/* Logo + Info */}
       <aside>
         <img
-          src={logo} // use imported logo
+          src={logo}
           alt="UniCluster Logo"
-          style={{ height: "5.5rem", width: "auto" }} 
+          style={{ height: "5.5rem", width: "auto" }}
           className="mb-2"
         />
         <p>
@@ -36,7 +36,7 @@ const Footer = () => {
         </Link>
       </nav>
 
-      {/* Social */}
+      {/* Social Media */}
       <nav>
         <h6 className="footer-title">Social</h6>
         <div className="grid grid-flow-col gap-4">
@@ -95,8 +95,13 @@ const Footer = () => {
           </a>
         </div>
       </nav>
+
+      {/* Copyright */}
+      <aside className="mt-4 sm:mt-0">
+        <p>Copyright © {new Date().getFullYear()} - All rights reserved</p>
+      </aside>
     </footer>
   );
 };
 
-export default Footer;
+export default StudentFooter;

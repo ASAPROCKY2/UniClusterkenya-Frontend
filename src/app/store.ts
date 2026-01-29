@@ -33,8 +33,8 @@ const asyncLocalStorage = {
 const rootReducer = combineReducers({
   // 🔥 RTK Query APIs
   [userAPI.reducerPath]: userAPI.reducer,
-  [studentsAPI.reducerPath]: studentsAPI.reducer,
-  [loginAPI.reducerPath]: loginAPI.reducer, // added here
+  [studentsAPI.reducerPath]: studentsAPI.reducer, // 👈 new student API slice
+  [loginAPI.reducerPath]: loginAPI.reducer,
 
   // persistent slices
   user: userReducer,
@@ -65,8 +65,8 @@ export const store = configureStore({
     }).concat(
       // 🔥 RTK Query middleware
       userAPI.middleware,
-      studentsAPI.middleware,
-      loginAPI.middleware //  added here
+      studentsAPI.middleware, // 👈 make sure middleware is added
+      loginAPI.middleware
     ),
 });
 

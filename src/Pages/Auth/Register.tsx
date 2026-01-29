@@ -4,6 +4,7 @@ import * as yup from "yup";
 import { useRegisterUserMutation } from "../../Features/users/UsersApi";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 import {
   FaEnvelope,
   FaLock,
@@ -21,6 +22,8 @@ import {
   FaGlobeAfrica,
   FaUniversity,
   FaCheckCircle,
+  FaEye,
+  FaEyeSlash,
 } from "react-icons/fa";
 
 /* =============================
@@ -40,28 +43,28 @@ type RegisterInputs = {
 };
 
 /* =============================
-   DUMMY DATA
+   DUMMY DATA WITH FLAG EMOJIS
 ============================= */
 const citizenshipOptions = [
-  { value: "", label: "Select Citizenship" },
-  { value: "Kenyan", label: "Kenyan" },
-  { value: "Tanzanian", label: "Tanzanian" },
-  { value: "Ugandan", label: "Ugandan" },
-  { value: "Rwandan", label: "Rwandan" },
-  { value: "Burundian", label: "Burundian" },
-  { value: "Ethiopian", label: "Ethiopian" },
-  { value: "Somali", label: "Somali" },
-  { value: "South Sudanese", label: "South Sudanese" },
-  { value: "Other East African", label: "Other East African" },
-  { value: "Other African", label: "Other African" },
-  { value: "Non-African", label: "Non-African" },
+  { value: "", label: "🌍 Select Citizenship", flag: "🌍" },
+  { value: "Kenyan", label: "🇰🇪 Kenyan", flag: "🇰🇪" },
+  { value: "Tanzanian", label: "🇹🇿 Tanzanian", flag: "🇹🇿" },
+  { value: "Ugandan", label: "🇺🇬 Ugandan", flag: "🇺🇬" },
+  { value: "Rwandan", label: "🇷🇼 Rwandan", flag: "🇷🇼" },
+  { value: "Burundian", label: "🇧🇮 Burundian", flag: "🇧🇮" },
+  { value: "Ethiopian", label: "🇪🇹 Ethiopian", flag: "🇪🇹" },
+  { value: "Somali", label: "🇸🇴 Somali", flag: "🇸🇴" },
+  { value: "South Sudanese", label: "🇸🇸 South Sudanese", flag: "🇸🇸" },
+  { value: "Other East African", label: "🌍 Other East African", flag: "🌍" },
+  { value: "Other African", label: "🌍 Other African", flag: "🌍" },
+  { value: "Non-African", label: "🌎 Non-African", flag: "🌎" },
 ];
 
 const genderOptions = [
-  { value: "", label: "Select Gender" },
-  { value: "Male", label: "Male" },
-  { value: "Female", label: "Female" },
-  { value: "Other", label: "Prefer not to say" },
+  { value: "", label: "👤 Select Gender" },
+  { value: "Male", label: "👨 Male" },
+  { value: "Female", label: "👩 Female" },
+  { value: "Other", label: "🙂 Prefer not to say" },
 ];
 
 /* =============================
@@ -82,7 +85,7 @@ const schema: yup.ObjectSchema<RegisterInputs> = yup.object({
   highSchool: yup.string().required("High school name is required"),
   kcseIndex: yup
     .string()
-    .matches(/^\d{10}\/\d{4}$/, "Format: 1234567890/2023")
+    .matches(/^\d{10}\/\d{4}$/, "Format: School Index / Year (e.g., 1234567890/2023)")
     .required("KCSE Index Number is required"),
 });
 
@@ -92,6 +95,10 @@ const schema: yup.ObjectSchema<RegisterInputs> = yup.object({
 function Register() {
   const navigate = useNavigate();
   const [registerUser, { isLoading }] = useRegisterUserMutation();
+  
+  // State for show/hide password
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -103,7 +110,8 @@ function Register() {
 
   const onSubmit: SubmitHandler<RegisterInputs> = async (data) => {
     try {
-      await registerUser({
+      // Call the registration API
+      const result = await registerUser({
         email: data.email,
         password: data.password,
         firstName: data.firstName,
@@ -112,12 +120,21 @@ function Register() {
         kcseIndex: data.kcseIndex,
         meanGrade: "C+",
         agp: 46,
+        phoneNumber: data.phoneNumber,
+        gender: data.gender,
         citizenship: data.citizenship,
         highSchool: data.highSchool,
       } as any).unwrap();
 
-      toast.success("🎉 Registration successful! Your journey begins now.");
-      navigate("/register", { state: { email: data.email } });
+      toast.success("🎉 Registration successful! Please verify your email.");
+
+      // ✅ REDIRECT TO VERIFY PAGE WITH EMAIL STATE
+      navigate("/verify", { 
+        state: { 
+          email: data.email,
+          firstName: data.firstName 
+        } 
+      });
 
     } catch (error: any) {
       const message =
@@ -204,7 +221,7 @@ function Register() {
 
           <div className="relative z-10 mt-8 pt-6 border-t border-white/20">
             <p className="text-sm text-blue-100">
-              Returning student?{" "}
+              Already have an account?{" "}
               <Link 
                 to="/login" 
                 className="text-white font-medium hover:underline inline-flex items-center gap-2 group"
@@ -268,7 +285,7 @@ function Register() {
                     placeholder="student@example.com"
                     {...register("email")} 
                     error={errors.email?.message}
-                    helpText="This will be your login username"
+                    helpText="This will be your login username and verification email"
                   />
                 </div>
                 
@@ -277,7 +294,7 @@ function Register() {
                   icon={<FaPhone className="text-gray-400" />} 
                   placeholder="+254 7XX XXX XXX"
                   {...register("phoneNumber")} 
-                  helpText="For university communication"
+                  helpText="For university communication (optional)"
                 />
                 
                 <Select 
@@ -325,11 +342,21 @@ function Register() {
                   <Input 
                     label="KCSE Index Number *" 
                     icon={<FaIdCard className="text-gray-400" />} 
-                    placeholder="1234567890/2023"
+                    placeholder="School Index / Year"
                     {...register("kcseIndex")} 
                     error={errors.kcseIndex?.message}
-                    helpText="Exactly as it appears on your KCSE certificate"
+                    helpText="Format: School Index / Year (e.g., 1234567890/2023)"
                   />
+                  <div className="mt-2 text-xs text-gray-500 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      <span>Enter your KCSE index exactly as it appears on your certificate</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      <span>Format: <strong>10-digit school index</strong> / <strong>4-digit year</strong></span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -347,20 +374,18 @@ function Register() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input 
+                <PasswordInput 
                   label="Password *" 
-                  icon={<FaLock className="text-gray-400" />} 
-                  type="password"
-                  placeholder="Create a strong password"
+                  showPassword={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
                   {...register("password")} 
                   error={errors.password?.message}
                   helpText="Minimum 6 characters with letters and numbers"
                 />
-                <Input 
+                <PasswordInput 
                   label="Confirm Password *" 
-                  icon={<FaLock className="text-gray-400" />} 
-                  type="password"
-                  placeholder="Re-enter your password"
+                  showPassword={showConfirmPassword}
+                  onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
                   {...register("confirmPassword")} 
                   error={errors.confirmPassword?.message}
                   helpText="Must match the password above"
@@ -378,7 +403,7 @@ function Register() {
                   </p>
                 </div>
                 <p className="text-sm text-gray-500">
-                  Already have an account?{" "}
+                  Already registered?{" "}
                   <Link to="/login" className="text-blue-600 font-medium hover:underline">
                     Sign In
                   </Link>
@@ -402,6 +427,13 @@ function Register() {
                   </>
                 )}
               </button>
+              
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-sm text-blue-700 flex items-start gap-2">
+                  <FaCheckCircle className="text-blue-500 mt-0.5 flex-shrink-0" />
+                  <span>After registration, you'll be redirected to verify your email address. Check your inbox for the verification link.</span>
+                </p>
+              </div>
               
               <p className="text-center text-xs text-gray-500 mt-4">
                 By clicking "Complete Registration", you agree to our{" "}
@@ -469,13 +501,68 @@ function Input({ label, icon, error, helpText, className, ...rest }: InputProps)
 }
 
 /* =============================
-   SELECT COMPONENT
+   PASSWORD INPUT COMPONENT WITH SHOW/HIDE TOGGLE
+============================= */
+interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  showPassword: boolean;
+  onToggle: () => void;
+  error?: string;
+  helpText?: string;
+}
+
+function PasswordInput({ label, showPassword, onToggle, error, helpText, className, ...rest }: PasswordInputProps) {
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <div className="relative group">
+        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-gray-600 transition-colors">
+          <FaLock />
+        </div>
+        <input
+          type={showPassword ? "text" : "password"}
+          className={`
+            w-full pl-12 pr-12 py-3.5 border rounded-xl
+            transition-all duration-200 bg-white
+            focus:outline-none focus:ring-3 focus:ring-blue-500/30 focus:border-blue-500
+            hover:border-gray-400
+            ${error ? 'border-red-500' : 'border-gray-300'}
+            placeholder:text-gray-400
+            ${className}
+          `}
+          {...rest}
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+          aria-label={showPassword ? "Hide password" : "Show password"}
+        >
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </div>
+      {error ? (
+        <p className="text-sm text-red-600 flex items-center gap-2 animate-fadeIn">
+          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+          {error}
+        </p>
+      ) : helpText ? (
+        <p className="text-xs text-gray-500 mt-1">{helpText}</p>
+      ) : null}
+    </div>
+  );
+}
+
+/* =============================
+   SELECT COMPONENT (UPDATED WITH FLAGS SUPPORT)
 ============================= */
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   icon?: React.ReactNode;
   error?: string;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; flag?: string }[];
 }
 
 function Select({ label, icon, error, options, className, ...rest }: SelectProps) {

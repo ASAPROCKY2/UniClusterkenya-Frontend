@@ -24,13 +24,16 @@ export type TRegisterUser = {
   lastName: string;
   email: string;
   password: string;
-
-  // student-only (optional at registration)
+  phoneNumber?: string;
+  gender?: string;
+  citizenship?: string;
+  highSchool?: string;
   kcseIndex?: string | null;
   meanGrade?: string | null;
   agp?: number | null;
   photoURL?: string | null;
 };
+
 
 // ✉️ Verify email
 export type TVerifyUser = {
