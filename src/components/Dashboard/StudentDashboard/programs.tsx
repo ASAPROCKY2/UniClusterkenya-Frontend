@@ -21,8 +21,10 @@ import {
   FaChartLine,
   FaEye,
   FaShareAlt,
+  FaArrowLeft,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 type SortType =
   | "name-asc"
@@ -39,6 +41,7 @@ interface ProgrammeCardProps {
   viewMode: ViewMode;
   isBookmarked: boolean;
   onToggleBookmark: (programmeId: number) => void;
+  onViewDetails?: (programmeId: number) => void;
 }
 
 const ProgrammeCard: React.FC<ProgrammeCardProps> = ({
@@ -46,29 +49,33 @@ const ProgrammeCard: React.FC<ProgrammeCardProps> = ({
   viewMode,
   isBookmarked,
   onToggleBookmark,
+  onViewDetails,
 }) => {
-  // Helper function to check if programme is recently added (within last 30 days)
-  const isRecentlyAdded = () => {
-    // You can add a createdAt field to your TProgramme type if needed
-    // For now, we'll use a simple heuristic based on programmeID
-    return programme.programmeID > 1000; // Example condition
+  const isRecentlyAdded = () => programme.programmeID > 1000;
+
+  const handleViewDetails = () => {
+    if (onViewDetails) {
+      onViewDetails(programme.programmeID);
+    }
   };
 
   if (viewMode === "compact") {
     return (
       <motion.div
         whileHover={{ scale: 1.02 }}
-        className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow"
+        className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow cursor-pointer"
+        onClick={handleViewDetails}
       >
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <h4 className="font-semibold text-sm truncate">{programme.name}</h4>
-            <p className="text-xs text-gray-600 truncate">
-              {programme.university?.name}
-            </p>
+            <p className="text-xs text-gray-600 truncate">{programme.university?.name}</p>
           </div>
           <button
-            onClick={() => onToggleBookmark(programme.programmeID)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleBookmark(programme.programmeID);
+            }}
             className="ml-2 text-gray-400 hover:text-yellow-500"
           >
             {isBookmarked ? <FaBookmarkSolid className="text-yellow-500" /> : <FaBookmark />}
@@ -135,7 +142,10 @@ const ProgrammeCard: React.FC<ProgrammeCardProps> = ({
                 <FaBookmark className="text-xl" />
               )}
             </button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+            <button 
+              onClick={handleViewDetails}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            >
               View Details
             </button>
           </div>
@@ -144,7 +154,6 @@ const ProgrammeCard: React.FC<ProgrammeCardProps> = ({
     );
   }
 
-  // Default grid view
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -206,7 +215,10 @@ const ProgrammeCard: React.FC<ProgrammeCardProps> = ({
       </div>
 
       <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-        <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors">
+        <button 
+          onClick={handleViewDetails}
+          className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors"
+        >
           <FaEye className="inline mr-2" />
           Details
         </button>
@@ -220,9 +232,7 @@ const ProgrammeCard: React.FC<ProgrammeCardProps> = ({
 };
 
 const Programs: React.FC = () => {
-  /* =============================
-     STATE MANAGEMENT
-  ============================= */
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedCluster, setSelectedCluster] = useState("");
@@ -237,57 +247,32 @@ const Programs: React.FC = () => {
   const [showHelbOnly, setShowHelbOnly] = useState(false);
   const [showScholarshipOnly, setShowScholarshipOnly] = useState(false);
 
-  /* =============================
-     API HOOKS
-  ============================= */
-  const {
-    data: allProgrammes = [],
-    isLoading,
-    isError,
-    refetch,
-  } = useGetAllProgrammesQuery();
-
+  const { data: allProgrammes = [], isLoading, isError, refetch } = useGetAllProgrammesQuery();
   const { data: levels = [] } = useGetProgrammeLevelsQuery();
   const { data: clusters = [] } = useGetProgrammeClustersQuery();
-
   const { data: filteredResults = [] } = useGetProgrammesWithFiltersQuery({
     level: selectedLevel || undefined,
     clusterID: selectedCluster ? Number(selectedCluster) : undefined,
   });
 
-  /* =============================
-     DATA PIPELINE (FIXED)
-  ============================= */
-  // 1️⃣ Base dataset
   const baseProgrammes = useMemo(() => {
     if (selectedLevel || selectedCluster) return filteredResults;
     return allProgrammes;
   }, [allProgrammes, filteredResults, selectedLevel, selectedCluster]);
 
-  // 2️⃣ Apply advanced filters
   const filteredByAdvanced = useMemo(() => {
     return baseProgrammes.filter((programme) => {
-      // AGP Range filter
       if (minAGP !== "" && programme.minAGP !== undefined && programme.minAGP < minAGP) return false;
       if (maxAGP !== "" && programme.minAGP !== undefined && programme.minAGP > maxAGP) return false;
-      
-      // HELB filter
       if (showHelbOnly && !programme.helbEligible) return false;
-      
-      // Scholarship filter
       if (showScholarshipOnly && !programme.scholarshipAvailable) return false;
-      
-      // Bookmarked filter
       if (showBookmarkedOnly && !bookmarkedPrograms.includes(programme.programmeID)) return false;
-      
       return true;
     });
   }, [baseProgrammes, minAGP, maxAGP, showHelbOnly, showScholarshipOnly, showBookmarkedOnly, bookmarkedPrograms]);
 
-  // 3️⃣ Apply search
   const searchedProgrammes = useMemo(() => {
     if (!searchQuery) return filteredByAdvanced;
-
     const query = searchQuery.toLowerCase();
     return filteredByAdvanced.filter((p) =>
       p.name?.toLowerCase().includes(query) ||
@@ -295,64 +280,38 @@ const Programs: React.FC = () => {
     );
   }, [filteredByAdvanced, searchQuery]);
 
-  // 4️⃣ Sorting
   const sortedProgrammes = useMemo(() => {
     return [...searchedProgrammes].sort((a, b) => {
       switch (sortBy) {
-        case "name-asc":
-          return (a.name ?? "").localeCompare(b.name ?? "");
-        case "name-desc":
-          return (b.name ?? "").localeCompare(a.name ?? "");
-        case "university-asc":
-          return (a.university?.name ?? "").localeCompare(
-            b.university?.name ?? ""
-          );
-        case "university-desc":
-          return (b.university?.name ?? "").localeCompare(
-            a.university?.name ?? ""
-          );
-        case "minAGP-asc":
-          return (a.minAGP || 0) - (b.minAGP || 0);
-        case "minAGP-desc":
-          return (b.minAGP || 0) - (a.minAGP || 0);
-        default:
-          return 0;
+        case "name-asc": return (a.name ?? "").localeCompare(b.name ?? "");
+        case "name-desc": return (b.name ?? "").localeCompare(a.name ?? "");
+        case "university-asc": return (a.university?.name ?? "").localeCompare(b.university?.name ?? "");
+        case "university-desc": return (b.university?.name ?? "").localeCompare(a.university?.name ?? "");
+        case "minAGP-asc": return (a.minAGP || 0) - (b.minAGP || 0);
+        case "minAGP-desc": return (b.minAGP || 0) - (a.minAGP || 0);
+        default: return 0;
       }
     });
   }, [searchedProgrammes, sortBy]);
 
-  // 5️⃣ Grouping
   const programmesByCluster = useMemo(() => {
     const groups: Record<string, TProgramme[]> = {};
-
     sortedProgrammes.forEach((p) => {
-      const clusterID =
-        p.clusters?.[0]?.clusterID?.toString() ||
-        selectedCluster ||
-        "all";
-
+      const clusterID = p.clusters?.[0]?.clusterID?.toString() || selectedCluster || "all";
       if (!groups[clusterID]) groups[clusterID] = [];
       groups[clusterID].push(p);
     });
-
     return Object.entries(groups).map(([clusterID, programmes]) => ({
       clusterID,
-      clusterName:
-        clusters.find((c) => c.clusterID.toString() === clusterID)?.name ??
-        "Programmes",
+      clusterName: clusters.find((c) => c.clusterID.toString() === clusterID)?.name ?? "Programmes",
       count: programmes.length,
       programmes,
     }));
   }, [sortedProgrammes, clusters, selectedCluster]);
 
-  /* =============================
-     UI HELPERS
-  ============================= */
   const toggleCluster = (clusterID: string) => {
     setExpandedClusters((prev) =>
-      prev.includes(clusterID)
-        ? prev.filter((id) => id !== clusterID)
-        : [...prev, clusterID]
+      prev.includes(clusterID) ? prev.filter((id) => id !== clusterID) : [...prev, clusterID]
     );
   };
 
@@ -371,62 +330,56 @@ const Programs: React.FC = () => {
 
   const toggleBookmark = (programmeId: number) => {
     setBookmarkedPrograms((prev) =>
-      prev.includes(programmeId)
-        ? prev.filter((id) => id !== programmeId)
-        : [...prev, programmeId]
+      prev.includes(programmeId) ? prev.filter((id) => id !== programmeId) : [...prev, programmeId]
     );
   };
 
-  const expandAllClusters = () => {
-    setExpandedClusters(programmesByCluster.map(({ clusterID }) => clusterID));
+  const expandAllClusters = () => setExpandedClusters(programmesByCluster.map(({ clusterID }) => clusterID));
+  const collapseAllClusters = () => setExpandedClusters([]);
+
+  const handleViewDetails = (programmeId: number) => {
+    navigate(`/student/dashboard/programmes/${programmeId}`);
   };
 
-  const collapseAllClusters = () => {
-    setExpandedClusters([]);
+  const handleBackToDashboard = () => {
+    navigate("/student/dashboard");
   };
 
-  /* =============================
-     LOADING & ERROR STATES
-  ============================= */
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <FaGraduationCap className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-blue-600 text-xl" />
-        </div>
-        <p className="mt-4 text-gray-600 font-medium">Loading programmes...</p>
+  if (isLoading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <FaGraduationCap className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-blue-600 text-xl" />
       </div>
-    );
-  }
+      <p className="mt-4 text-gray-600 font-medium">Loading programmes...</p>
+    </div>
+  );
 
-  if (isError) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white p-6">
-        <div className="text-red-500 text-6xl mb-4">⚠️</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Failed to load programmes</h2>
-        <p className="text-gray-600 mb-6 text-center max-w-md">
-          There was an error loading the programmes. Please check your connection and try again.
-        </p>
-        <button
-          onClick={() => refetch()}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
-        >
-          <FaSearch className="text-sm" />
-          Retry Loading
-        </button>
-      </div>
-    );
-  }
+  if (isError) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white p-6">
+      <div className="text-red-500 text-6xl mb-4">⚠️</div>
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">Failed to load programmes</h2>
+      <p className="text-gray-600 mb-6 text-center max-w-md">There was an error loading the programmes. Please check your connection and try again.</p>
+      <button onClick={() => refetch()} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2">
+        <FaSearch className="text-sm" /> Retry Loading
+      </button>
+    </div>
+  );
 
-  /* =============================
-     RENDER
-  ============================= */
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Header */}
+      {/* Header with Back Button */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-8">
         <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={handleBackToDashboard}
+              className="flex items-center gap-2 text-blue-100 hover:text-white transition-colors"
+            >
+              <FaArrowLeft />
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
             University Programmes Explorer
           </h1>
@@ -763,6 +716,7 @@ const Programs: React.FC = () => {
                           viewMode={viewMode}
                           isBookmarked={bookmarkedPrograms.includes(programme.programmeID)}
                           onToggleBookmark={toggleBookmark}
+                          onViewDetails={handleViewDetails}
                         />
                       ))}
                     </div>

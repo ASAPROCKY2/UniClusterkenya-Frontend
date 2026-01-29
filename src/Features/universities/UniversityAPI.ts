@@ -17,7 +17,7 @@ export type TUniversity = {
 
 export type TProgramme = {
   programmeID: number;
-  universityID: number;
+  universityID?: number; // optional, because we have a join table
   name: string;
   level?: string | null;
   durationYears?: number | null;
@@ -94,7 +94,7 @@ export const universityAPI = createApi({
       invalidatesTags: ["Universities"],
     }),
 
-    // Get university with programmes
+    // Get university with programmes (existing)
     getUniversityWithProgrammes: builder.query<
       TUniversityWithProgrammes,
       number
@@ -102,6 +102,13 @@ export const universityAPI = createApi({
       query: (id) => `/university/full/${id}`,
       transformResponse: (response: { data: TUniversityWithProgrammes }) =>
         response.data,
+      providesTags: ["Universities"],
+    }),
+
+    // NEW: Get universities offering a specific programme
+    getUniversitiesByProgramme: builder.query<TUniversity[], number>({
+      query: (programmeID) => `/university/programme/${programmeID}`,
+      transformResponse: (response: { data: TUniversity[] }) => response.data,
       providesTags: ["Universities"],
     }),
   }),
@@ -118,4 +125,5 @@ export const {
   useUpdateUniversityMutation,
   useDeleteUniversityMutation,
   useGetUniversityWithProgrammesQuery,
+  useGetUniversitiesByProgrammeQuery, // NEW HOOK
 } = universityAPI;

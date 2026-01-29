@@ -11,8 +11,12 @@ import Login from "./Pages/Auth/Login";
 // ===== Student Dashboard =====
 import Dashboard from "./components/Dashboard/StudentDashboard/dashboard";
 import University from "./components/Dashboard/StudentDashboard/University";
-import Programs from "./components/Dashboard/StudentDashboard/programs"; 
-import Placement from "./components/Dashboard/StudentDashboard/PlacementStatus"; 
+import Programs from "./components/Dashboard/StudentDashboard/programs";
+import Placement from "./components/Dashboard/StudentDashboard/PlacementStatus";
+
+// ===== New Components =====
+import ProgrammeUniversities from "./components/Dashboard/StudentDashboard/ProgrammeUniversities";
+import UniversityProgramDetail from "./components/Dashboard/StudentDashboard/UniversityProgrammeDetail";
 
 function App() {
   return (
@@ -24,15 +28,35 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-
-          {/* ===== VERIFY USER ROUTE ===== */}
           <Route path="/verify" element={<VerifyUser />} />
 
-          {/* ===== STUDENT DASHBOARD ROUTES ===== */}
+          {/* ===== EXISTING WORKING DASHBOARD ROUTES (UNCHANGED) ===== */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/universities" element={<University />} />
           <Route path="/dashboard/programs" element={<Programs />} />
-          <Route path="/dashboard/placement" element={<Placement />} /> {/* ✅ New route */}
+          <Route path="/dashboard/placement" element={<Placement />} />
+
+          {/* ===== NEW ROUTES (ADDED, NOT REPLACED) ===== */}
+          {/* These fix the "No routes matched" error */}
+          <Route
+            path="/student/dashboard/programmes/:programmeID"
+            element={<ProgrammeUniversities />}
+          />
+
+          <Route
+            path="/student/dashboard/programmes/:programmeID/university/:universityID"
+            element={<UniversityProgramDetail />}
+          />
+
+          {/* Optional aliases (safe fallback) */}
+          <Route
+            path="/programme/:programmeID/universities"
+            element={<ProgrammeUniversities />}
+          />
+          <Route
+            path="/university/:universityID/programme/:programmeID"
+            element={<UniversityProgramDetail />}
+          />
         </Routes>
       </BrowserRouter>
 
