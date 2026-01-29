@@ -1,4 +1,3 @@
-// src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 
@@ -6,11 +5,15 @@ import { Toaster } from "sonner";
 import Landingpage from "./Pages/Landingpage";
 import AboutPage from "./Pages/AboutPage";
 import Register from "./Pages/Auth/Register";
-import VerifyUser from "./Pages/Auth/VerifyUser"; 
-import Login from "./Pages/Auth/Login"; 
+import VerifyUser from "./Pages/Auth/VerifyUser";
+import Login from "./Pages/Auth/Login";
 
 // ===== Student Dashboard =====
-import Dashboard from "./components/Dashboard/StudentDashboard/dashboard"
+import Dashboard from "./components/Dashboard/StudentDashboard/dashboard";
+import University from "./components/Dashboard/StudentDashboard/University";
+import Programs from "./components/Dashboard/StudentDashboard/programs"; 
+import Placement from "./components/Dashboard/StudentDashboard/PlacementStatus"; 
+
 function App() {
   return (
     <>
@@ -19,14 +22,17 @@ function App() {
           {/* ===== PUBLIC ROUTES ===== */}
           <Route path="/" element={<Landingpage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/register" element={<Register />} /> 
-          <Route path="/login" element={<Login />} /> {/* Login route added */}
-          
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+
           {/* ===== VERIFY USER ROUTE ===== */}
           <Route path="/verify" element={<VerifyUser />} />
 
-          {/* ===== STUDENT DASHBOARD ROUTE ===== */}
+          {/* ===== STUDENT DASHBOARD ROUTES ===== */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/universities" element={<University />} />
+          <Route path="/dashboard/programs" element={<Programs />} />
+          <Route path="/dashboard/placement" element={<Placement />} /> {/* ✅ New route */}
         </Routes>
       </BrowserRouter>
 
