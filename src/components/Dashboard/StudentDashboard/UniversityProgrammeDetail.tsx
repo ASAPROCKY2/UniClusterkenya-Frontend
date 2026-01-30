@@ -1,6 +1,6 @@
 // src/components/Universities/UniversityProgramDetail.tsx
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useGetUniversityWithProgrammesQuery } from "../../../Features/universities/UniversityAPI";
 
 const UniversityProgramDetail: React.FC = () => {
@@ -8,6 +8,8 @@ const UniversityProgramDetail: React.FC = () => {
     universityID: string;
     programmeID: string;
   }>();
+
+  const navigate = useNavigate();
 
   const { data: university, isLoading, isError } =
     useGetUniversityWithProgrammesQuery(Number(universityID));
@@ -60,7 +62,8 @@ const UniversityProgramDetail: React.FC = () => {
 
       <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
         <p className="mb-2">
-          <span className="font-semibold">Level:</span> {programme.level ?? "N/A"}
+          <span className="font-semibold">Level:</span>{" "}
+          {programme.level ?? "N/A"}
         </p>
         <p className="mb-2">
           <span className="font-semibold">Duration (Years):</span>{" "}
@@ -79,9 +82,22 @@ const UniversityProgramDetail: React.FC = () => {
           {programme.scholarshipAvailable ? "Yes" : "No"}
         </p>
       </div>
+
+      {/* APPLY BUTTON — NEW FEATURE */}
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={() =>
+            navigate(
+              `/applications/new?universityID=${universityID}&programmeID=${programmeID}`
+            )
+          }
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+        >
+          Apply for this Programme
+        </button>
+      </div>
     </div>
   );
 };
 
 export default UniversityProgramDetail;
- 

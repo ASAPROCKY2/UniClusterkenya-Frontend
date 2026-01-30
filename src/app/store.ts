@@ -17,7 +17,8 @@ import { loginAPI } from "../Features/Login/LoginAPI";
 import { kcseResultsAPI } from "../Features/KcseResults/kcseResultsAPI";
 import { universityAPI } from "../Features/universities/UniversityAPI";
 import { programmesAPI } from "../Features/programmes/ProgrammesAPI";
-import { placementAPI } from "../Features/placement/placementAPI"; 
+import { placementAPI } from "../Features/placement/placementAPI";
+import { applicationAPI } from "../Features/application/applicationAPI"; 
 
 // ===== REDUCERS =====
 import userReducer from "../Features/Login/UserSlice";
@@ -44,7 +45,8 @@ const rootReducer = combineReducers({
   [kcseResultsAPI.reducerPath]: kcseResultsAPI.reducer,
   [universityAPI.reducerPath]: universityAPI.reducer,
   [programmesAPI.reducerPath]: programmesAPI.reducer,
-  [placementAPI.reducerPath]: placementAPI.reducer, // ✅ ADD PLACEMENTS REDUCER
+  [placementAPI.reducerPath]: placementAPI.reducer,
+  [applicationAPI.reducerPath]: applicationAPI.reducer, // ✅ APPLICATIONS
 
   // 🔒 Persisted slices
   user: userReducer,
@@ -87,7 +89,8 @@ export const store = configureStore({
       kcseResultsAPI.middleware,
       universityAPI.middleware,
       programmesAPI.middleware,
-      placementAPI.middleware // ✅ ADD PLACEMENTS MIDDLEWARE
+      placementAPI.middleware,
+      applicationAPI.middleware // ✅ APPLICATIONS
     ),
 });
 

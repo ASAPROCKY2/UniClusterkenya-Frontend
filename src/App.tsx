@@ -17,6 +17,7 @@ import Placement from "./components/Dashboard/StudentDashboard/PlacementStatus";
 // ===== New Components =====
 import ProgrammeUniversities from "./components/Dashboard/StudentDashboard/ProgrammeUniversities";
 import UniversityProgramDetail from "./components/Dashboard/StudentDashboard/UniversityProgrammeDetail";
+import ApplicationPage from "./components/Dashboard/StudentDashboard/ApplicationPage";
 
 function App() {
   return (
@@ -30,25 +31,29 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/verify" element={<VerifyUser />} />
 
-          {/* ===== EXISTING WORKING DASHBOARD ROUTES (UNCHANGED) ===== */}
+          {/* ===== EXISTING DASHBOARD ROUTES ===== */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/universities" element={<University />} />
           <Route path="/dashboard/programs" element={<Programs />} />
           <Route path="/dashboard/placement" element={<Placement />} />
 
-          {/* ===== NEW ROUTES (ADDED, NOT REPLACED) ===== */}
-          {/* These fix the "No routes matched" error */}
+          {/* ===== NEW STUDENT DASHBOARD ROUTES ===== */}
           <Route
             path="/student/dashboard/programmes/:programmeID"
             element={<ProgrammeUniversities />}
           />
-
           <Route
             path="/student/dashboard/programmes/:programmeID/university/:universityID"
             element={<UniversityProgramDetail />}
           />
 
-          {/* Optional aliases (safe fallback) */}
+          {/* ===== APPLICATION ROUTE (fixed for query params) ===== */}
+          <Route
+            path="/applications/new"
+            element={<ApplicationPage />}
+          />
+
+          {/* ===== Optional aliases / safe fallback ===== */}
           <Route
             path="/programme/:programmeID/universities"
             element={<ProgrammeUniversities />}

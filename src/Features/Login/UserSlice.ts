@@ -4,19 +4,17 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 /* =============================
    TYPES
 ============================= */
-export type UserRole =
-  | "student"
-  | "university_admin"
-  | "system_admin";
+export type UserRole = "student" | "university_admin" | "system_admin";
 
 export type User = {
-  userID: number;               
-  lastname: string;
-    firstname: string; 
+  userID: number;
+  firstName: string;
+  lastName: string;
   email: string;
   role: UserRole;
-  kcseIndex?: string;           
-  image_url?: string;
+  kcseIndex?: string;
+  meanGrade?: string;
+  imageUrl?: string;
 };
 
 export type UserState = {
@@ -41,10 +39,21 @@ const userSlice = createSlice({
   reducers: {
     loginSuccess: (
       state,
-      action: PayloadAction<{ token: string; user: User }>
+      action: PayloadAction<{ token: string; user: any }>
     ) => {
+      // Map API snake_case fields to camelCase
+      const u = action.payload.user;
       state.token = action.payload.token;
-      state.user = action.payload.user;
+      state.user = {
+        userID: u.userID,
+        firstName: u.first_name ?? "—",
+        lastName: u.last_name ?? "—",
+        email: u.email,
+        role: u.role,
+        kcseIndex: u.kcse_index ?? "—",
+        meanGrade: u.mean_grade ?? "—",
+        imageUrl: u.image_url ?? null,
+      };
     },
 
     logout: (state) => {
@@ -52,10 +61,7 @@ const userSlice = createSlice({
       state.user = null;
     },
 
-    updateUser: (
-      state,
-      action: PayloadAction<Partial<User>>
-    ) => {
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       }
@@ -66,7 +72,6 @@ const userSlice = createSlice({
 /* =============================
    EXPORTS
 ============================= */
-export const { loginSuccess, logout, updateUser } =
-  userSlice.actions;
+export const { loginSuccess, logout, updateUser } = userSlice.actions;
 
 export default userSlice.reducer;
