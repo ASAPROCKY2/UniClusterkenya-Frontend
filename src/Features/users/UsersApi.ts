@@ -5,7 +5,7 @@ import { ApiDomain } from "../../utilis/APiDomain";
    TYPES (MATCH BACKEND)
 ============================= */
 
-// 🔐 Auth user (login response)
+//  Auth user (login response)
 export type TAuthUser = {
   userID: number;
   email: string;
@@ -34,14 +34,13 @@ export type TRegisterUser = {
   photoURL?: string | null;
 };
 
-
-// ✉️ Verify email
+//  Verify email
 export type TVerifyUser = {
   email: string;
   verificationCode: string;
 };
 
-// 🔑 Login payload
+//  Login payload
 export type TLoginRequest = {
   email: string;
   password: string;
@@ -67,8 +66,10 @@ export type TUser = {
   meanGrade?: string | null;
   agp?: number | null;
   photoURL?: string | null;
-
   createdAt?: string;
+
+  gender?: string | null;      
+  highSchool?: string | null;  
 };
 
 /* =============================
@@ -90,7 +91,6 @@ export const userAPI = createApi({
        AUTH
     ============================= */
 
-    // 📝 Register
     registerUser: builder.mutation<{ message: string }, TRegisterUser>({
       query: (body) => ({
         url: "/auth/register",
@@ -99,7 +99,6 @@ export const userAPI = createApi({
       }),
     }),
 
-    // ✉️ Verify email
     verifyUser: builder.mutation<{ message: string }, TVerifyUser>({
       query: (body) => ({
         url: "/auth/verify",
@@ -108,7 +107,6 @@ export const userAPI = createApi({
       }),
     }),
 
-    // 🔑 Login
     loginUser: builder.mutation<TLoginResponse, TLoginRequest>({
       query: (body) => ({
         url: "/auth/login",
@@ -121,7 +119,6 @@ export const userAPI = createApi({
        USERS
     ============================= */
 
-    // 👥 Get all users
     getUsers: builder.query<TUser[], void>({
       query: () => "/users",
       transformResponse: (response: { data: any[] }) =>
@@ -137,11 +134,12 @@ export const userAPI = createApi({
           agp: u.agp,
           photoURL: u.photoURL,
           createdAt: u.createdAt,
+          gender: u.gender,          // ✅ added
+          highSchool: u.highSchool,  // ✅ added
         })),
       providesTags: ["Users"],
     }),
 
-    // 👤 Get user by ID
     getUserById: builder.query<TUser, number>({
       query: (id) => `/users/${id}`,
       transformResponse: (response: { data: any }) => ({
@@ -156,10 +154,11 @@ export const userAPI = createApi({
         agp: response.data.agp,
         photoURL: response.data.photoURL,
         createdAt: response.data.createdAt,
+        gender: response.data.gender,          // ✅ added
+        highSchool: response.data.highSchool,  // ✅ added
       }),
     }),
 
-    // ✏️ Update user
     updateUser: builder.mutation<
       { message: string },
       { id: number; updates: Partial<TUser> }
@@ -172,7 +171,6 @@ export const userAPI = createApi({
       invalidatesTags: ["Users"],
     }),
 
-    // 🗑 Delete user
     deleteUser: builder.mutation<{ message: string }, number>({
       query: (id) => ({
         url: `/users/${id}`,

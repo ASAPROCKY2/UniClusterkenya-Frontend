@@ -43,6 +43,7 @@ const userSlice = createSlice({
     ) => {
       // Map API snake_case fields to camelCase
       const u = action.payload.user;
+
       state.token = action.payload.token;
       state.user = {
         userID: u.userID,
@@ -54,11 +55,18 @@ const userSlice = createSlice({
         meanGrade: u.mean_grade ?? "—",
         imageUrl: u.image_url ?? null,
       };
+
+      // ✅ OPTIONAL persistence (safe even if unused elsewhere)
+      localStorage.setItem("token", action.payload.token);
     },
 
     logout: (state) => {
+      // ✅ clear redux auth state
       state.token = null;
       state.user = null;
+
+      // ✅ clear persisted auth (does NOT affect existing logic)
+      localStorage.removeItem("token");
     },
 
     updateUser: (state, action: PayloadAction<Partial<User>>) => {

@@ -1,23 +1,34 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 
-// ===== Public pages =====
+/* =============================
+   PUBLIC PAGES
+============================= */
 import Landingpage from "./Pages/Landingpage";
 import AboutPage from "./Pages/AboutPage";
 import Register from "./Pages/Auth/Register";
 import VerifyUser from "./Pages/Auth/VerifyUser";
 import Login from "./Pages/Auth/Login";
 
-// ===== Student Dashboard =====
+/* =============================
+   STUDENT DASHBOARD
+============================= */
 import Dashboard from "./components/Dashboard/StudentDashboard/dashboard";
 import University from "./components/Dashboard/StudentDashboard/University";
 import Programs from "./components/Dashboard/StudentDashboard/programs";
 import Placement from "./components/Dashboard/StudentDashboard/PlacementStatus";
 
-// ===== New Components =====
+/* =============================
+   PROGRAMME FLOW
+============================= */
 import ProgrammeUniversities from "./components/Dashboard/StudentDashboard/ProgrammeUniversities";
 import UniversityProgramDetail from "./components/Dashboard/StudentDashboard/UniversityProgrammeDetail";
+
+/* =============================
+   APPLICATIONS
+============================= */
 import ApplicationPage from "./components/Dashboard/StudentDashboard/ApplicationPage";
+import Applications from "./components/Dashboard/StudentDashboard/Application";
 
 function App() {
   return (
@@ -31,13 +42,19 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/verify" element={<VerifyUser />} />
 
-          {/* ===== EXISTING DASHBOARD ROUTES ===== */}
+          {/* ===== STUDENT DASHBOARD ===== */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/universities" element={<University />} />
           <Route path="/dashboard/programs" element={<Programs />} />
           <Route path="/dashboard/placement" element={<Placement />} />
 
-          {/* ===== NEW STUDENT DASHBOARD ROUTES ===== */}
+          {/* ===== DASHBOARD APPLICATIONS (FIXED) ===== */}
+          {/* All applications for the current user */}
+          <Route path="/dashboard/applications" element={<Applications />} />
+          {/* Single application view with userID param */}
+          <Route path="/dashboard/application/:userID" element={<Applications />} />
+
+          {/* ===== PROGRAMME → UNIVERSITY FLOW ===== */}
           <Route
             path="/student/dashboard/programmes/:programmeID"
             element={<ProgrammeUniversities />}
@@ -47,13 +64,13 @@ function App() {
             element={<UniversityProgramDetail />}
           />
 
-          {/* ===== APPLICATION ROUTE (fixed for query params) ===== */}
-          <Route
-            path="/applications/new"
-            element={<ApplicationPage />}
-          />
+          {/* ===== APPLICATION ROUTES ===== */}
+          {/* Apply / create */}
+          <Route path="/applications/new" element={<ApplicationPage />} />
+          {/* View applications (non-dashboard access) */}
+          <Route path="/applications" element={<Applications />} />
 
-          {/* ===== Optional aliases / safe fallback ===== */}
+          {/* ===== SAFE ALIASES (DO NOT REMOVE) ===== */}
           <Route
             path="/programme/:programmeID/universities"
             element={<ProgrammeUniversities />}
@@ -65,7 +82,7 @@ function App() {
         </Routes>
       </BrowserRouter>
 
-      {/* Notifications */}
+      {/* ===== TOAST NOTIFICATIONS ===== */}
       <Toaster
         position="top-right"
         toastOptions={{

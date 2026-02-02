@@ -30,7 +30,7 @@ const StudentCard: React.FC = () => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-md border border-gray-200">
+    <div className="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
         {/* ===== Avatar ===== */}
         <img
@@ -41,17 +41,43 @@ const StudentCard: React.FC = () => {
 
         {/* ===== Info ===== */}
         <div className="flex-1">
+          {/* Name */}
           <h2 className="text-2xl font-bold text-gray-800">
             {student.firstName} {student.lastName}
           </h2>
+
+          {/* Email */}
           <p className="text-gray-500 mb-4">{student.email}</p>
 
+          {/* Grid Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Role */}
             <div>
               <p className="text-gray-600 font-semibold">Role</p>
-              <p className="text-gray-800">{student.role}</p>
+              <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                {student.role}
+              </span>
             </div>
 
+            {/* Gender */}
+            {student.gender && (
+              <div>
+                <p className="text-gray-600 font-semibold">Gender</p>
+                <span className="inline-block bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm">
+                  {student.gender}
+                </span>
+              </div>
+            )}
+
+            {/* High School */}
+            {student.highSchool && (
+              <div>
+                <p className="text-gray-600 font-semibold">High School</p>
+                <p className="text-gray-800">{student.highSchool}</p>
+              </div>
+            )}
+
+            {/* KCSE Index */}
             {student.kcseIndex && (
               <div>
                 <p className="text-gray-600 font-semibold">KCSE Index</p>
@@ -59,6 +85,7 @@ const StudentCard: React.FC = () => {
               </div>
             )}
 
+            {/* Mean Grade */}
             {student.meanGrade && (
               <div>
                 <p className="text-gray-600 font-semibold">Mean Grade</p>
@@ -66,6 +93,7 @@ const StudentCard: React.FC = () => {
               </div>
             )}
 
+            {/* AGP */}
             {student.agp !== null && student.agp !== undefined && (
               <div>
                 <p className="text-gray-600 font-semibold">AGP</p>
@@ -74,6 +102,7 @@ const StudentCard: React.FC = () => {
             )}
           </div>
 
+          {/* Account Creation */}
           {student.createdAt && (
             <p className="text-gray-400 mt-4 text-sm">
               Account created on {new Date(student.createdAt).toLocaleDateString()}

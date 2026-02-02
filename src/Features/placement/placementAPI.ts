@@ -7,11 +7,18 @@ import type { RootState } from "../../app/store";
    TYPES
 ============================= */
 
+// University / Institution attached to programme
+export type TPlacementUniversity = {
+  universityID: number;
+  name: string;
+};
+
 // Programme attached to placement
 export type TPlacementProgramme = {
   programmeID: number;
   name: string;
   level?: string | null;
+  university?: TPlacementUniversity | null; 
 };
 
 // Placement type (matches PlacementsTable + relations)

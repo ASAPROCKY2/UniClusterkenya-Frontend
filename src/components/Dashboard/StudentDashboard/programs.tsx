@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   useGetAllProgrammesQuery,
   useGetProgrammeLevelsQuery,
@@ -234,8 +234,8 @@ const ProgrammeCard: React.FC<ProgrammeCardProps> = ({
 const Programs: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLevel, setSelectedLevel] = useState("");
-  const [selectedCluster, setSelectedCluster] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState<string>("");
+  const [selectedCluster, setSelectedCluster] = useState<string>("");
   const [expandedClusters, setExpandedClusters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortType>("name-asc");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -247,67 +247,133 @@ const Programs: React.FC = () => {
   const [showHelbOnly, setShowHelbOnly] = useState(false);
   const [showScholarshipOnly, setShowScholarshipOnly] = useState(false);
 
+  // Get base data
   const { data: allProgrammes = [], isLoading, isError, refetch } = useGetAllProgrammesQuery();
   const { data: levels = [] } = useGetProgrammeLevelsQuery();
   const { data: clusters = [] } = useGetProgrammeClustersQuery();
-  const { data: filteredResults = [] } = useGetProgrammesWithFiltersQuery({
-    level: selectedLevel || undefined,
-    clusterID: selectedCluster ? Number(selectedCluster) : undefined,
-  });
 
+  // ✅ FIXED: Only query with filters when they are actually selected
+  const { data: filteredResults = [], isFetching: isFiltering } = useGetProgrammesWithFiltersQuery(
+    {
+      level: selectedLevel || undefined,
+      clusterID: selectedCluster ? parseInt(selectedCluster) : undefined,
+    },
+    {
+      // Skip query if no filters are selected
+      skip: !selectedLevel && !selectedCluster,
+    }
+  );
+
+  // Use filtered results when filters are active, otherwise use all programmes
   const baseProgrammes = useMemo(() => {
-    if (selectedLevel || selectedCluster) return filteredResults;
+    // If we have active filters and filtered results are loading/loaded, use them
+    if ((selectedLevel || selectedCluster) && filteredResults.length > 0) {
+      return filteredResults;
+    }
+    // Otherwise, use all programmes
     return allProgrammes;
   }, [allProgrammes, filteredResults, selectedLevel, selectedCluster]);
 
+  // Apply advanced filters
   const filteredByAdvanced = useMemo(() => {
     return baseProgrammes.filter((programme) => {
+      // AGP range filter
       if (minAGP !== "" && programme.minAGP !== undefined && programme.minAGP < minAGP) return false;
       if (maxAGP !== "" && programme.minAGP !== undefined && programme.minAGP > maxAGP) return false;
+      
+      // HELB filter
       if (showHelbOnly && !programme.helbEligible) return false;
+      
+      // Scholarship filter
       if (showScholarshipOnly && !programme.scholarshipAvailable) return false;
+      
+      // Bookmark filter
       if (showBookmarkedOnly && !bookmarkedPrograms.includes(programme.programmeID)) return false;
+      
       return true;
     });
   }, [baseProgrammes, minAGP, maxAGP, showHelbOnly, showScholarshipOnly, showBookmarkedOnly, bookmarkedPrograms]);
 
+  // Apply search
   const searchedProgrammes = useMemo(() => {
-    if (!searchQuery) return filteredByAdvanced;
-    const query = searchQuery.toLowerCase();
+    if (!searchQuery.trim()) return filteredByAdvanced;
+    
+    const query = searchQuery.toLowerCase().trim();
     return filteredByAdvanced.filter((p) =>
       p.name?.toLowerCase().includes(query) ||
-      p.university?.name?.toLowerCase().includes(query)
+      p.university?.name?.toLowerCase().includes(query) ||
+      p.level?.toLowerCase().includes(query)
     );
   }, [filteredByAdvanced, searchQuery]);
 
+  // Apply sorting
   const sortedProgrammes = useMemo(() => {
     return [...searchedProgrammes].sort((a, b) => {
       switch (sortBy) {
-        case "name-asc": return (a.name ?? "").localeCompare(b.name ?? "");
-        case "name-desc": return (b.name ?? "").localeCompare(a.name ?? "");
-        case "university-asc": return (a.university?.name ?? "").localeCompare(b.university?.name ?? "");
-        case "university-desc": return (b.university?.name ?? "").localeCompare(a.university?.name ?? "");
-        case "minAGP-asc": return (a.minAGP || 0) - (b.minAGP || 0);
-        case "minAGP-desc": return (b.minAGP || 0) - (a.minAGP || 0);
-        default: return 0;
+        case "name-asc": 
+          return (a.name ?? "").localeCompare(b.name ?? "");
+        case "name-desc": 
+          return (b.name ?? "").localeCompare(a.name ?? "");
+        case "university-asc": 
+          return (a.university?.name ?? "").localeCompare(b.university?.name ?? "");
+        case "university-desc": 
+          return (b.university?.name ?? "").localeCompare(a.university?.name ?? "");
+        case "minAGP-asc": 
+          return (a.minAGP || 0) - (b.minAGP || 0);
+        case "minAGP-desc": 
+          return (b.minAGP || 0) - (a.minAGP || 0);
+        default: 
+          return 0;
       }
     });
   }, [searchedProgrammes, sortBy]);
 
+  // Group by cluster for display
   const programmesByCluster = useMemo(() => {
-    const groups: Record<string, TProgramme[]> = {};
-    sortedProgrammes.forEach((p) => {
-      const clusterID = p.clusters?.[0]?.clusterID?.toString() || selectedCluster || "all";
-      if (!groups[clusterID]) groups[clusterID] = [];
-      groups[clusterID].push(p);
+    const groups: Record<string, { clusterName: string; count: number; programmes: TProgramme[] }> = {};
+    
+    // Initialize with all clusters
+    clusters.forEach(cluster => {
+      groups[cluster.clusterID.toString()] = {
+        clusterName: cluster.name,
+        count: 0,
+        programmes: []
+      };
     });
-    return Object.entries(groups).map(([clusterID, programmes]) => ({
-      clusterID,
-      clusterName: clusters.find((c) => c.clusterID.toString() === clusterID)?.name ?? "Programmes",
-      count: programmes.length,
-      programmes,
-    }));
-  }, [sortedProgrammes, clusters, selectedCluster]);
+    
+    // Add "All Programmes" group for uncategorized
+    groups["all"] = {
+      clusterName: "All Programmes",
+      count: 0,
+      programmes: []
+    };
+    
+    // Distribute programmes to groups
+    sortedProgrammes.forEach(programme => {
+      if (programme.clusters && programme.clusters.length > 0) {
+        // Add to each cluster the programme belongs to
+        programme.clusters.forEach(cluster => {
+          const clusterId = cluster.clusterID.toString();
+          if (groups[clusterId]) {
+            groups[clusterId].programmes.push(programme);
+            groups[clusterId].count++;
+          }
+        });
+      } else {
+        // Add to "All Programmes" if no cluster
+        groups["all"].programmes.push(programme);
+        groups["all"].count++;
+      }
+    });
+    
+    // Convert to array and filter out empty groups
+    return Object.entries(groups)
+      .filter(([_, group]) => group.count > 0)
+      .map(([clusterID, group]) => ({
+        clusterID,
+        ...group
+      }));
+  }, [sortedProgrammes, clusters]);
 
   const toggleCluster = (clusterID: string) => {
     setExpandedClusters((prev) =>
@@ -342,8 +408,20 @@ const Programs: React.FC = () => {
   };
 
   const handleBackToDashboard = () => {
-    navigate("/student/dashboard");
+    navigate("/dashboard");
   };
+
+  // Debug logging to help identify issues
+  useEffect(() => {
+    console.log("Filter State:", {
+      selectedLevel,
+      selectedCluster,
+      allProgrammesCount: allProgrammes.length,
+      filteredResultsCount: filteredResults.length,
+      baseProgrammesCount: baseProgrammes.length,
+      isFiltering
+    });
+  }, [selectedLevel, selectedCluster, allProgrammes.length, filteredResults.length, baseProgrammes.length, isFiltering]);
 
   if (isLoading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white">
@@ -611,8 +689,9 @@ const Programs: React.FC = () => {
             <div className="text-gray-600">
               <span className="font-semibold text-gray-800">{sortedProgrammes.length}</span> programmes found
               {selectedLevel && ` • Level: ${selectedLevel}`}
-              {selectedCluster && ` • Cluster: ${selectedCluster}`}
+              {selectedCluster && ` • Cluster: ${clusters.find(c => c.clusterID.toString() === selectedCluster)?.name}`}
               {searchQuery && ` • Search: "${searchQuery}"`}
+              {isFiltering && <span className="ml-2 text-blue-600">(Filtering...)</span>}
             </div>
             <div className="flex gap-2">
               {selectedLevel || selectedCluster || searchQuery || showAdvancedFilters ? (
@@ -636,7 +715,7 @@ const Programs: React.FC = () => {
 
         {/* Programmes Display */}
         <div className="space-y-6">
-          {programmesByCluster.length === 0 ? (
+          {sortedProgrammes.length === 0 ? (
             <div className="bg-white rounded-2xl shadow p-12 text-center">
               <FaSearch className="text-5xl text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">

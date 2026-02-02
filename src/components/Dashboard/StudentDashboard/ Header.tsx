@@ -1,15 +1,26 @@
+// src/components/Dashboard/StudentDashboard/StudentHeader.tsx
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import logo from "../../../assets/images/logo.png";
 import { ArrowLeft } from "lucide-react";
+import { logout } from "../../../Features/Login/UserSlice";
 
 const StudentHeader: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+
   const isHomePage = location.pathname === "/dashboard";
 
   // Function to check if link is active
   const isActive = (path: string) => location.pathname === path;
+
+  // ✅ Logout handler (same format as Profile.tsx)
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
 
   return (
     <div className="navbar bg-base-100 shadow-md px-4 lg:px-10">
@@ -74,9 +85,9 @@ const StudentHeader: React.FC = () => {
 
             <li>
               <Link
-                to="/dashboard/application"
+                to="/dashboard/applications"
                 className={`hover:text-primary font-semibold ${
-                  isActive("/dashboard/application") ? "text-primary" : ""
+                  isActive("/dashboard/applications") ? "text-primary" : ""
                 }`}
               >
                 Applications
@@ -106,7 +117,12 @@ const StudentHeader: React.FC = () => {
             </li>
 
             <li className="mt-2">
-              <button className="btn btn-error w-full">Logout</button>
+              <button
+                className="btn btn-error w-full"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </div>
@@ -150,9 +166,9 @@ const StudentHeader: React.FC = () => {
 
           <li>
             <Link
-              to="/dashboard/application"
+              to="/dashboard/applications"
               className={`text-base lg:text-lg font-semibold ${
-                isActive("/dashboard/application") ? "text-primary" : "text-primary"
+                isActive("/dashboard/applications") ? "text-primary" : ""
               }`}
             >
               Applications
@@ -186,9 +202,7 @@ const StudentHeader: React.FC = () => {
       {/* ===== RIGHT SIDE ===== */}
       <div className="navbar-end">
         <button
-          onClick={() => {
-            // TODO: handle logout logic
-          }}
+          onClick={handleLogout}
           className="btn btn-error btn-sm lg:btn-md rounded-full"
         >
           Logout

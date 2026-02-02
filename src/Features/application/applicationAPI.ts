@@ -14,7 +14,7 @@ export type TApplicationProgramme = {
   level?: string | null;
 };
 
-// Application type (matches ApplicationsTable + relations)
+// Application type
 export type TApplication = {
   applicationID: number;
   userID: number;
@@ -60,9 +60,8 @@ export const applicationAPI = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState & {
-        auth?: { token?: string };
-      })?.auth?.token;
+      // ✅ CORRECT: token lives directly on user slice
+      const token = (getState() as RootState).user.token;
 
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
@@ -78,21 +77,22 @@ export const applicationAPI = createApi({
        APPLICATION QUERIES
     ============================= */
 
-    // 🔹 Get all applications (admin)
+    // Get all applications (admin)
     getAllApplications: builder.query<TApplication[], void>({
       query: () => "/application",
       transformResponse: (response: { data: TApplication[] }) => response.data,
       providesTags: ["Applications"],
     }),
 
-    // 🔹 Get application by ID
+    // Get application by ID
     getApplicationById: builder.query<TApplication, number>({
       query: (applicationID) => `/application/${applicationID}`,
       transformResponse: (response: { data: TApplication }) => response.data,
       providesTags: ["Applications"],
     }),
 
-    // ⭐ Get applications for a specific student (STUDENT DASHBOARD)
+    // ✅ FIXED: matches backend route exactly
+    // GET /application/student/:studentID
     getApplicationsByUserId: builder.query<TApplication[], number>({
       query: (userID) => `/application/student/${userID}`,
       transformResponse: (response: { data: TApplication[] }) => response.data,
@@ -103,7 +103,7 @@ export const applicationAPI = createApi({
        APPLICATION MUTATIONS
     ============================= */
 
-    // 🔹 Create application (APPLY)
+    // Create application
     createApplication: builder.mutation<
       { message: string; data: TApplication },
       TCreateApplicationPayload
@@ -116,7 +116,7 @@ export const applicationAPI = createApi({
       invalidatesTags: ["Applications"],
     }),
 
-    // 🔹 Update application
+    // Update application
     updateApplication: builder.mutation<
       { message: string },
       TUpdateApplicationPayload
@@ -129,7 +129,7 @@ export const applicationAPI = createApi({
       invalidatesTags: ["Applications"],
     }),
 
-    // 🔹 Delete application
+    // Delete application
     deleteApplication: builder.mutation<{ message: string }, number>({
       query: (applicationID) => ({
         url: `/application/${applicationID}`,
@@ -142,7 +142,6 @@ export const applicationAPI = createApi({
        APPLICATION WINDOW QUERIES
     ============================= */
 
-    // 🔹 Get all application windows
     getAllApplicationWindows: builder.query<TApplicationWindow[], void>({
       query: () => "/application-window",
       transformResponse: (response: { data: TApplicationWindow[] }) =>
