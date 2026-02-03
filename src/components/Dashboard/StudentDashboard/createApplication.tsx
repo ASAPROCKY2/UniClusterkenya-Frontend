@@ -8,19 +8,31 @@ import {
   type TCreateApplicationPayload,
 } from "../../../Features/application/applicationAPI";
 import { FaClipboardList, FaPlusCircle } from "react-icons/fa";
-
-// If you don't have a Skeleton component yet, remove this import or create one
 import { Skeleton } from "../../../components/ui/skeleton";
+import { clusterAPI, type TCluster } from "../../../Features/Cluster/clusterAPI";
+
+// If you have a programmes API
+import { useGetAllProgrammesQuery } from "../../../Features/programmes/ProgrammesAPI";
 
 const CreateApplication = () => {
   const { user } = useSelector((state: RootState) => state.user);
-  const userId = user?.userID; 
+  const userId = user?.userID;
 
   const [selectedProgramme, setSelectedProgramme] = useState<TApplicationProgramme | null>(null);
+  const [selectedCluster, setSelectedCluster] = useState<TCluster | null>(null);
   const [choiceOrder, setChoiceOrder] = useState<number>(1);
 
-  // Fetch all application windows to check if application period is active
+  // Fetch all application windows
   const { data: windows, isLoading: windowsLoading } = applicationAPI.useGetAllApplicationWindowsQuery();
+
+  // Fetch programmes
+  const { data: programmes = [], isLoading: programmesLoading } = useGetAllProgrammesQuery();
+
+  // Fetch clusters dynamically based on selected programme
+  const { data: clusters = [], isLoading: clustersLoading } = clusterAPI.useGetClustersByProgrammeQuery(
+    selectedProgramme?.programmeID ?? 0,
+    { skip: !selectedProgramme }
+  );
 
   // Mutation to create application
   const [createApplication, { isLoading: creating, error: createError, reset }] =
@@ -29,6 +41,7 @@ const CreateApplication = () => {
   const handleApply = async () => {
     if (!userId || !selectedProgramme) return;
 
+    // NOTE: clusterID removed from payload because backend type doesn't accept it
     const payload: TCreateApplicationPayload = {
       userID: userId,
       programmeID: selectedProgramme.programmeID,
@@ -39,11 +52,12 @@ const CreateApplication = () => {
       await createApplication(payload).unwrap();
       alert("Application submitted successfully!");
       setSelectedProgramme(null);
+      setSelectedCluster(null);
       setChoiceOrder(1);
       reset();
     } catch (err: any) {
       console.error(err);
-      alert("Failed to submit application: " + err?.data?.message || err.message);
+      alert("Failed to submit application: " + (err?.data?.message || err.message));
     }
   };
 
@@ -61,7 +75,6 @@ const CreateApplication = () => {
     );
   }
 
-  // Check for active application window
   const activeWindow = windows?.find((w) => w.isActive);
 
   return (
@@ -76,15 +89,13 @@ const CreateApplication = () => {
           {activeWindow
             ? `Application window: ${activeWindow.name} (${new Date(
                 activeWindow.startDate
-              ).toLocaleDateString()} - ${new Date(
-                activeWindow.endDate
-              ).toLocaleDateString()})`
+              ).toLocaleDateString()} - ${new Date(activeWindow.endDate).toLocaleDateString()})`
             : "No active application window"}
         </div>
       </div>
 
       {/* Loading */}
-      {windowsLoading && (
+      {(windowsLoading || programmesLoading || clustersLoading) && (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -92,35 +103,63 @@ const CreateApplication = () => {
         </div>
       )}
 
-      {/* Application Form */}
       {activeWindow ? (
         <div className="space-y-4">
+          {/* Programme selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Select Programme
             </label>
             <select
               value={selectedProgramme?.programmeID || ""}
-              onChange={(e) =>
-                setSelectedProgramme(
-                  e.target.selectedIndex >= 0
-                    ? {
-                        programmeID: Number(e.target.value),
-                        name: e.target.options[e.target.selectedIndex].text,
-                      }
-                    : null
-                )
-              }
+              onChange={(e) => {
+                const programmeID = Number(e.target.value);
+                const programmeName = e.target.selectedOptions[0]?.text || "";
+                if (programmeID) {
+                  setSelectedProgramme({ programmeID, name: programmeName });
+                  setSelectedCluster(null); // reset cluster
+                } else {
+                  setSelectedProgramme(null);
+                  setSelectedCluster(null);
+                }
+              }}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
               <option value="">-- Select a programme --</option>
-              {/* TODO: Replace with real programmes list */}
-              <option value={1}>Computer Science</option>
-              <option value={2}>Business Administration</option>
-              <option value={3}>Mechanical Engineering</option>
+              {programmes.map((p) => (
+                <option key={p.programmeID} value={p.programmeID}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </div>
 
+          {/* Cluster selection */}
+          {selectedProgramme && clusters.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Select Cluster
+              </label>
+              <select
+                value={selectedCluster?.clusterID || ""}
+                onChange={(e) => {
+                  const clusterID = Number(e.target.value);
+                  const cluster = clusters.find((c) => c.clusterID === clusterID) || null;
+                  setSelectedCluster(cluster); // now includes clusterCode
+                }}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              >
+                <option value="">-- Select a cluster --</option>
+                {clusters.map((c) => (
+                  <option key={c.clusterID} value={c.clusterID}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Choice Order */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Choice Order

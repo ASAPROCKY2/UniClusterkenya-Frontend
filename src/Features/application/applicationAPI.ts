@@ -1,4 +1,3 @@
-// src/features/applications/applicationAPI.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../../utilis/APiDomain";
 import type { RootState } from "../../app/store";
@@ -7,14 +6,12 @@ import type { RootState } from "../../app/store";
    TYPES
 ============================= */
 
-// Programme attached to application
 export type TApplicationProgramme = {
   programmeID: number;
   name: string;
   level?: string | null;
 };
 
-// Application type
 export type TApplication = {
   applicationID: number;
   userID: number;
@@ -51,6 +48,15 @@ export type TApplicationWindow = {
   isActive: boolean;
 };
 
+// NEW: cluster subject for validation
+export type TClusterSubject = {
+  id: number;
+  subjectCode: string;
+  subjectName: string;
+  minPoints: number;
+  alternativeGroup?: number | null;
+};
+
 /* =============================
    API
 ============================= */
@@ -60,50 +66,45 @@ export const applicationAPI = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
-      // ✅ CORRECT: token lives directly on user slice
       const token = (getState() as RootState).user.token;
-
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-
+      if (token) headers.set("Authorization", `Bearer ${token}`);
       headers.set("Content-Type", "application/json");
       return headers;
     },
   }),
-  tagTypes: ["Applications", "ApplicationWindows"],
+  tagTypes: ["Applications", "ApplicationWindows", "ClusterSubjects"],
   endpoints: (builder) => ({
     /* =============================
        APPLICATION QUERIES
     ============================= */
-
-    // Get all applications (admin)
     getAllApplications: builder.query<TApplication[], void>({
       query: () => "/application",
-      transformResponse: (response: { data: TApplication[] }) => response.data,
+      transformResponse: (res: { data: TApplication[] }) => res.data,
       providesTags: ["Applications"],
     }),
 
-    // Get application by ID
     getApplicationById: builder.query<TApplication, number>({
       query: (applicationID) => `/application/${applicationID}`,
-      transformResponse: (response: { data: TApplication }) => response.data,
+      transformResponse: (res: { data: TApplication }) => res.data,
       providesTags: ["Applications"],
     }),
 
-    // ✅ FIXED: matches backend route exactly
-    // GET /application/student/:studentID
     getApplicationsByUserId: builder.query<TApplication[], number>({
       query: (userID) => `/application/student/${userID}`,
-      transformResponse: (response: { data: TApplication[] }) => response.data,
+      transformResponse: (res: { data: TApplication[] }) => res.data,
       providesTags: ["Applications"],
+    }),
+
+    // NEW: fetch cluster subjects for a programme for frontend validation
+    getProgrammeClusterSubjects: builder.query<TClusterSubject[], number>({
+      query: (programmeID) => `/programmes/${programmeID}/clusters-with-subjects`,
+      transformResponse: (res: { data: TClusterSubject[] }) => res.data,
+      providesTags: ["ClusterSubjects"],
     }),
 
     /* =============================
        APPLICATION MUTATIONS
     ============================= */
-
-    // Create application
     createApplication: builder.mutation<
       { message: string; data: TApplication },
       TCreateApplicationPayload
@@ -116,7 +117,6 @@ export const applicationAPI = createApi({
       invalidatesTags: ["Applications"],
     }),
 
-    // Update application
     updateApplication: builder.mutation<
       { message: string },
       TUpdateApplicationPayload
@@ -129,7 +129,6 @@ export const applicationAPI = createApi({
       invalidatesTags: ["Applications"],
     }),
 
-    // Delete application
     deleteApplication: builder.mutation<{ message: string }, number>({
       query: (applicationID) => ({
         url: `/application/${applicationID}`,
@@ -141,11 +140,9 @@ export const applicationAPI = createApi({
     /* =============================
        APPLICATION WINDOW QUERIES
     ============================= */
-
     getAllApplicationWindows: builder.query<TApplicationWindow[], void>({
       query: () => "/application-window",
-      transformResponse: (response: { data: TApplicationWindow[] }) =>
-        response.data,
+      transformResponse: (res: { data: TApplicationWindow[] }) => res.data,
       providesTags: ["ApplicationWindows"],
     }),
   }),
@@ -163,4 +160,5 @@ export const {
   useUpdateApplicationMutation,
   useDeleteApplicationMutation,
   useGetAllApplicationWindowsQuery,
+  useGetProgrammeClusterSubjectsQuery,
 } = applicationAPI;

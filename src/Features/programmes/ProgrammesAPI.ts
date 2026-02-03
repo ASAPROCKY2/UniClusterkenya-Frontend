@@ -11,6 +11,14 @@ export type TSProgrammeCluster = {
   name: string;
 };
 
+export type TClusterSubject = {
+  id: number;
+  subjectCode: string;
+  subjectName: string;
+  minPoints: number;
+  alternativeGroup?: number | null;
+};
+
 export type TProgramme = {
   programmeID: number;
   universityID: number;
@@ -22,6 +30,9 @@ export type TProgramme = {
   scholarshipAvailable: boolean;
 
   clusters?: TSProgrammeCluster[];
+
+  // NEW: include subjects for each cluster for frontend validation
+  clusterSubjects?: Record<number, TClusterSubject[]>;
 
   university?: {
     universityID: number;
@@ -74,14 +85,12 @@ export const programmesAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Programmes"],
+  tagTypes: ["Programmes", "Clusters", "ClusterSubjects"],
 
   endpoints: (builder) => ({
-
     /* =============================
        BASIC CRUD
     ============================= */
-
     getAllProgrammes: builder.query<TProgramme[], void>({
       query: () => "/programme",
       transformResponse: (res: any) => res?.data ?? [],
@@ -91,6 +100,7 @@ export const programmesAPI = createApi({
     getProgrammeById: builder.query<TProgramme, number>({
       query: (id) => `/programme/${id}`,
       transformResponse: (res: any) => res?.data ?? null,
+      providesTags: ["Programmes"],
     }),
 
     createProgramme: builder.mutation<
@@ -132,7 +142,6 @@ export const programmesAPI = createApi({
     /* =============================
        LOOKUPS
     ============================= */
-
     getProgrammeLevels: builder.query<
       { levelID: number; name: string; description?: string }[],
       void
@@ -141,15 +150,29 @@ export const programmesAPI = createApi({
       transformResponse: (res: any) => res?.data ?? [],
     }),
 
-    getProgrammeClusters: builder.query<TSProgrammeCluster[], void>({
-      query: () => "/programme/clusters",
-      transformResponse: (res: any) => res?.data ?? [],
+    getProgrammeClusters: builder.query<TSProgrammeCluster[], number>({
+      query: (programmeID) => `/programmes/${programmeID}/clusters`,
+      providesTags: ["Clusters"],
+    }),
+
+    getClusterSubjectsByCluster: builder.query<TClusterSubject[], number>({
+      query: (clusterID) => `/cluster-subjects/${clusterID}`,
+      providesTags: ["ClusterSubjects"],
+    }),
+
+    // NEW: Get all clusters with their subjects for a programme
+    getProgrammeClustersWithSubjects: builder.query<
+      Record<number, TClusterSubject[]>,
+      number
+    >({
+      query: (programmeID) => `/programmes/${programmeID}/clusters-with-subjects`,
+      transformResponse: (res: any) => res?.data ?? {},
+      providesTags: ["Clusters", "ClusterSubjects"],
     }),
 
     /* =============================
        FILTERED QUERIES
     ============================= */
-
     getProgrammesByLevel: builder.query<TProgramme[], string>({
       query: (level) => `/programme/level/${level}`,
       transformResponse: (res: any) => res?.data ?? [],
@@ -160,28 +183,13 @@ export const programmesAPI = createApi({
       transformResponse: (res: any) => res?.data ?? [],
     }),
 
-    /**
-     * ✅ SMART FILTER HANDLER
-     * Matches backend routes exactly
-     */
     getProgrammesWithFilters: builder.query<TProgramme[], TProgramFilter>({
       query: ({ level, clusterID }) => {
-        // BOTH filters → /programme/filter
         if (level && clusterID) {
           return `/programme/filter?level=${level}&clusterID=${clusterID}`;
         }
-
-        // Level only
-        if (level) {
-          return `/programme/level/${level}`;
-        }
-
-        // Cluster only
-        if (clusterID !== undefined) {
-          return `/programme/cluster/${clusterID}`;
-        }
-
-        // Fallback
+        if (level) return `/programme/level/${level}`;
+        if (clusterID !== undefined) return `/programme/cluster/${clusterID}`;
         return `/programme`;
       },
       transformResponse: (res: any) => res?.data ?? [],
@@ -201,6 +209,8 @@ export const {
   useDeleteProgrammeByIdMutation,
   useGetProgrammeLevelsQuery,
   useGetProgrammeClustersQuery,
+  useGetClusterSubjectsByClusterQuery,
+  useGetProgrammeClustersWithSubjectsQuery,
   useGetProgrammesByLevelQuery,
   useGetProgrammesByClusterQuery,
   useGetProgrammesWithFiltersQuery,

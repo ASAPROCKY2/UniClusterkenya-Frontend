@@ -6,6 +6,7 @@ import {
   useGetProgrammesWithFiltersQuery,
 } from "../../../Features/programmes/ProgrammesAPI";
 import type { TProgramme } from "../../../Features/programmes/ProgrammesAPI";
+import { skipToken } from "@reduxjs/toolkit/query/react";
 import {
   FaSearch,
   FaChevronDown,
@@ -250,7 +251,7 @@ const Programs: React.FC = () => {
   // Get base data
   const { data: allProgrammes = [], isLoading, isError, refetch } = useGetAllProgrammesQuery();
   const { data: levels = [] } = useGetProgrammeLevelsQuery();
-  const { data: clusters = [] } = useGetProgrammeClustersQuery();
+  const { data: clusters = [] } = useGetProgrammeClustersQuery(skipToken);
 
   // ✅ FIXED: Only query with filters when they are actually selected
   const { data: filteredResults = [], isFetching: isFiltering } = useGetProgrammesWithFiltersQuery(

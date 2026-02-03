@@ -1,4 +1,5 @@
 // src/dashboard/StudentDashboard/applications/ApplicationPage.tsx
+
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -12,16 +13,19 @@ const ApplicationPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // 🔹 Get programmeID from URL
   const queryParams = new URLSearchParams(location.search);
   const programmeID = queryParams.get("programmeID");
 
+  // 🔹 Logged in user
   const userID = useSelector((state: RootState) => state.user.user?.userID);
   const { data: user, isLoading } = useGetUserByIdQuery(userID ?? skipToken);
 
-  const [choiceOrder, setChoiceOrder] = useState(1);
-  const [createApplication, { isLoading: isSubmitting }] = useCreateApplicationMutation();
+  const [choiceOrder, setChoiceOrder] = useState<number>(1);
+  const [createApplication, { isLoading: isSubmitting }] =
+    useCreateApplicationMutation();
 
-  if (!user || isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-gray-600">Loading user data...</p>
@@ -37,7 +41,7 @@ const ApplicationPage: React.FC = () => {
     meanGrade = "—",
   } = user;
 
-  // ✅ Handle the create mutation
+  // 🔹 Submit application
   const handleSubmit = async () => {
     if (!programmeID) {
       toast.error("Invalid programme selected");
@@ -49,10 +53,11 @@ const ApplicationPage: React.FC = () => {
         userID: user.userID,
         programmeID: Number(programmeID),
         choiceOrder,
-      }).unwrap(); // unwrap to catch errors properly
+        // ❌ NO cluster here (cluster comes from programme)
+      }).unwrap();
 
       toast.success("Application submitted successfully 🎉");
-      navigate("/dashboard/applications"); // redirect to applications page
+      navigate("/dashboard/applications");
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to submit application");
     }
@@ -102,7 +107,7 @@ const ApplicationPage: React.FC = () => {
           <option value={4}>Fourth Choice</option>
         </select>
 
-        {/* Action Buttons */}
+        {/* Actions */}
         <div className="flex justify-between">
           <button
             onClick={() => navigate(-1)}
