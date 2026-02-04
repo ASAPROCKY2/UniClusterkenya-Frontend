@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 
@@ -30,6 +31,13 @@ import UniversityProgramDetail from "./components/Dashboard/StudentDashboard/Uni
 import ApplicationPage from "./components/Dashboard/StudentDashboard/ApplicationPage";
 import Applications from "./components/Dashboard/StudentDashboard/Application";
 
+/* =============================
+   UNIVERSITY ADMIN DASHBOARD
+============================= */
+import UniversityDashboard from "./components/Dashboard/UniversityAdminDashboard/Universitydashboard";
+import ProgrammeComponent from "./components/Dashboard/UniversityAdminDashboard/Program/program";
+import UniversityComponent from "./components/Dashboard/UniversityAdminDashboard/Universities/Universities"; // <-- NEW
+
 function App() {
   return (
     <>
@@ -48,10 +56,8 @@ function App() {
           <Route path="/dashboard/programs" element={<Programs />} />
           <Route path="/dashboard/placement" element={<Placement />} />
 
-          {/* ===== DASHBOARD APPLICATIONS (FIXED) ===== */}
-          {/* All applications for the current user */}
+          {/* ===== DASHBOARD APPLICATIONS ===== */}
           <Route path="/dashboard/applications" element={<Applications />} />
-          {/* Single application view with userID param */}
           <Route path="/dashboard/application/:userID" element={<Applications />} />
 
           {/* ===== PROGRAMME → UNIVERSITY FLOW ===== */}
@@ -65,12 +71,10 @@ function App() {
           />
 
           {/* ===== APPLICATION ROUTES ===== */}
-          {/* Apply / create */}
           <Route path="/applications/new" element={<ApplicationPage />} />
-          {/* View applications (non-dashboard access) */}
           <Route path="/applications" element={<Applications />} />
 
-          {/* ===== SAFE ALIASES (DO NOT REMOVE) ===== */}
+          {/* ===== SAFE ALIASES ===== */}
           <Route
             path="/programme/:programmeID/universities"
             element={<ProgrammeUniversities />}
@@ -79,6 +83,12 @@ function App() {
             path="/university/:universityID/programme/:programmeID"
             element={<UniversityProgramDetail />}
           />
+
+          {/* ===== UNIVERSITY ADMIN DASHBOARD ===== */}
+          <Route path="/university" element={<UniversityDashboard />} />
+          {/* MATCH SIDEBAR LINK EXACTLY */}
+          <Route path="/university/programs" element={<ProgrammeComponent />} />
+          <Route path="/university/manage" element={<UniversityComponent />} /> {/* <-- NEW */}
         </Routes>
       </BrowserRouter>
 

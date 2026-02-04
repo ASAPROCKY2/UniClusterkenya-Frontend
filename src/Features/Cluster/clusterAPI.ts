@@ -18,7 +18,7 @@ export type TClusterSubject = {
   alternativeGroup?: number | null;
 };
 
-// API
+// API - UPDATED to match actual backend routes
 export const clusterAPI = createApi({
   reducerPath: "clusterAPI",
   baseQuery: fetchBaseQuery({
@@ -33,11 +33,22 @@ export const clusterAPI = createApi({
   tagTypes: ["Clusters", "ClusterSubjects"],
   endpoints: (builder) => ({
     getClustersByProgramme: builder.query<TCluster[], number>({
-      query: (programmeID) => `/programmes/${programmeID}/clusters`,
+     
+      query: (programmeID) => ({
+        url: `/programme/${programmeID}`,
+ 
+      }),
+      // Since programme endpoint includes clusters in response
+      transformResponse: (response: any) => {
+        return response?.data?.clusters || [];
+      },
       providesTags: ["Clusters"],
     }),
+    
     getClusterSubjectsByCluster: builder.query<TClusterSubject[], number>({
-      query: (clusterID) => `/cluster-subjects/${clusterID}`,
+      // Changed from: /cluster-subjects/{clusterID}
+      // To: /cluster-subjects/cluster/{clusterID} (matches backend route)
+      query: (clusterID) => `/cluster-subjects/cluster/${clusterID}`,
       providesTags: ["ClusterSubjects"],
     }),
   }),

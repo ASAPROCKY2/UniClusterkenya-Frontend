@@ -1,17 +1,15 @@
-<!-- // src/dashboard/UniversityAdminDashboard/aside/UniversityFooter.tsx
 import { Link } from "react-router-dom";
 import logo from "../../../assets/images/logo.png";
 
 const UniversityFooter = () => {
-  const imgStyle = { height: "5.5rem", width: "auto" };
   return (
     <footer className="footer sm:footer-horizontal bg-neutral text-neutral-content p-10">
-      {/* Logo + Info */}
+      {/* ===== LOGO + INFO ===== */}
       <aside>
         <img
           src={logo}
           alt="UniCluster Logo"
-          style={imgStyle}
+          style={{ height: "5.5rem", width: "auto" }}
           className="mb-2"
         />
         <p>
@@ -21,24 +19,24 @@ const UniversityFooter = () => {
         </p>
       </aside>
 
-      {/* Quick Links */}
+      {/* ===== QUICK LINKS ===== */}
       <nav>
         <h6 className="footer-title">Quick Links</h6>
-        <Link to="/university/info" className="link link-hover">
-          University Info
+        <Link to="/university" className="link link-hover">
+          Dashboard
         </Link>
         <Link to="/university/programs" className="link link-hover">
-          Programs & Slots
+          Programs
         </Link>
-        <Link to="/university/applicants" className="link link-hover">
-          Applicants
+        <Link to="/university/applications" className="link link-hover">
+          Applications
         </Link>
-        <Link to="/university/settings" className="link link-hover">
-          Settings
+        <Link to="/university/students" className="link link-hover">
+          Students
         </Link>
       </nav>
 
-      {/* Social Media */}
+      {/* ===== SOCIAL MEDIA ===== */}
       <nav>
         <h6 className="footer-title">Social</h6>
         <div className="grid grid-flow-col gap-4">
@@ -98,12 +96,14 @@ const UniversityFooter = () => {
         </div>
       </nav>
 
-      {/* Copyright */}
+      {/* ===== COPYRIGHT ===== */}
       <aside className="mt-4 sm:mt-0">
-        <p>Copyright © {new Date().getFullYear()} - All rights reserved</p>
+        <p>
+          Copyright © {new Date().getFullYear()} – All rights reserved
+        </p>
       </aside>
     </footer>
   );
 };
 
-export default UniversityFooter; -->
+export default UniversityFooter;

@@ -1,12 +1,11 @@
 // src/dashboard/UniversityAdminDashboard/aside/drawerData.ts
+
 import {
   FaTachometerAlt,
-  FaUniversity,
   FaBook,
-  FaUserFriends,
-  FaChartBar,
-  FaCog,
-  FaUserCircle,
+  FaClipboardList,
+  FaUserGraduate,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 export type DrawerData = {
@@ -18,46 +17,33 @@ export type DrawerData = {
 
 export const universityAdminDrawerData: DrawerData[] = [
   {
-    id: "dashboard",
+    id: "dashboard-overview",
     name: "Dashboard Overview",
     icon: FaTachometerAlt,
-    link: "/university",
-  },
-  {
-    id: "university",
-    name: "University Info",
-    icon: FaUniversity,
-    link: "/university/info",
+    link: "/university/dashboard",
   },
   {
     id: "programs",
-    name: "Programs & Slots",
+    name: "Programs",
     icon: FaBook,
     link: "/university/programs",
   },
   {
-    id: "applicants",
-    name: "Applicants List",
-    icon: FaUserFriends,
-    link: "/university/applicants",
+    id: "applications",
+    name: "Applications",
+    icon: FaClipboardList,
+    link: "/university/applications",
   },
   {
-    id: "admission",
-    name: "Admission Stats",
-    icon: FaChartBar,
-    link: "/university/admission-stats",
-  },
- 
-  {
-    id: "settings",
-    name: "Settings",
-    icon: FaCog,
-    link: "/university/settings",
+    id: "students",
+    name: "Students",
+    icon: FaUserGraduate,
+    link: "/university/students",
   },
   {
-    id: "profile",
-    name: "My Profile",
-    icon: FaUserCircle,
-    link: "/university/profile",
+    id: "logout",
+    name: "Logout",
+    icon: FaSignOutAlt,
+    link: "/logout",
   },
 ];

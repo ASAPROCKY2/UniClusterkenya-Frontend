@@ -1,12 +1,18 @@
 import React, { useMemo, useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetUniversityWithProgrammesQuery } from "../../../Features/universities/UniversityAPI";
-import { clusterAPI, type TCluster, type TClusterSubject } from "../../../Features/Cluster/clusterAPI";
 import { useGetUserByIdQuery } from "../../../Features/users/UsersApi";
 import { useGetKcseResultsByUserIdQuery } from "../../../Features/KcseResults/kcseResultsAPI";
 import { skipToken } from "@reduxjs/toolkit/query/react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../app/store";
+
+// Import from programmesAPI instead of clusterAPI
+import {
+  programmesAPI,
+  type TSProgrammeCluster as TCluster, // Rename for consistency
+  type TClusterSubject,
+} from "../../../Features/programmes/ProgrammesAPI";
 
 const UniversityProgramDetail: React.FC = () => {
   const { universityID, programmeID } = useParams<{ universityID: string; programmeID: string }>();
@@ -32,13 +38,22 @@ const UniversityProgramDetail: React.FC = () => {
     try {
       const programmeIdNum = Number(programmeID);
 
-      const clustersResult = await dispatch(clusterAPI.endpoints.getClustersByProgramme.initiate(programmeIdNum)).unwrap();
-      setClusters(clustersResult ?? []);
+      // FIXED: Use programmesAPI instead of clusterAPI
+      // Get clusters from the programme endpoint
+      const programmeResult = await dispatch(
+        programmesAPI.endpoints.getProgrammeById.initiate(programmeIdNum)
+      ).unwrap();
+      
+      // Extract clusters from the programme response
+      const clustersResult = programmeResult?.clusters || [];
+      setClusters(clustersResult);
 
+      // Fetch subjects for each cluster
       const subjectsData: Record<number, TClusterSubject[]> = {};
-      for (const cluster of clustersResult ?? []) {
+      for (const cluster of clustersResult) {
         const subjectResult = await dispatch(
-          clusterAPI.endpoints.getClusterSubjectsByCluster.initiate(cluster.clusterID)
+          // FIXED: Use the correct endpoint from programmesAPI
+          programmesAPI.endpoints.getClusterSubjectsByCluster.initiate(cluster.clusterID)
         ).unwrap();
         subjectsData[cluster.clusterID] = subjectResult ?? [];
       }

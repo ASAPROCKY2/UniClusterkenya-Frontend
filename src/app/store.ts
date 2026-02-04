@@ -18,7 +18,8 @@ import { kcseResultsAPI } from "../Features/KcseResults/kcseResultsAPI";
 import { universityAPI } from "../Features/universities/UniversityAPI";
 import { programmesAPI } from "../Features/programmes/ProgrammesAPI";
 import { placementAPI } from "../Features/placement/placementAPI";
-import { applicationAPI } from "../Features/application/applicationAPI"; 
+import { applicationAPI } from "../Features/application/applicationAPI";
+import { clusterAPI } from "../Features/Cluster/clusterAPI"; // ADDED: Cluster API
 
 // ===== REDUCERS =====
 import userReducer from "../Features/Login/UserSlice";
@@ -38,7 +39,7 @@ const asyncLocalStorage = {
    ROOT REDUCER
 ============================ */
 const rootReducer = combineReducers({
-  // 🔥 RTK Query reducers
+  // RTK Query reducers
   [userAPI.reducerPath]: userAPI.reducer,
   [studentsAPI.reducerPath]: studentsAPI.reducer,
   [loginAPI.reducerPath]: loginAPI.reducer,
@@ -46,9 +47,10 @@ const rootReducer = combineReducers({
   [universityAPI.reducerPath]: universityAPI.reducer,
   [programmesAPI.reducerPath]: programmesAPI.reducer,
   [placementAPI.reducerPath]: placementAPI.reducer,
-  [applicationAPI.reducerPath]: applicationAPI.reducer, // ✅ APPLICATIONS
+  [applicationAPI.reducerPath]: applicationAPI.reducer,
+  [clusterAPI.reducerPath]: clusterAPI.reducer, // ADDED: Cluster API reducer
 
-  // 🔒 Persisted slices
+  // Persisted slices
   user: userReducer,
 });
 
@@ -82,7 +84,7 @@ export const store = configureStore({
         ],
       },
     }).concat(
-      // 🔥 RTK Query middleware
+      // RTK Query middleware
       userAPI.middleware,
       studentsAPI.middleware,
       loginAPI.middleware,
@@ -90,7 +92,8 @@ export const store = configureStore({
       universityAPI.middleware,
       programmesAPI.middleware,
       placementAPI.middleware,
-      applicationAPI.middleware // ✅ APPLICATIONS
+      applicationAPI.middleware,
+      clusterAPI.middleware // ADDED: Cluster API middleware
     ),
 });
 
