@@ -36,7 +36,25 @@ import Applications from "./components/Dashboard/StudentDashboard/Application";
 ============================= */
 import UniversityDashboard from "./components/Dashboard/UniversityAdminDashboard/Universitydashboard";
 import ProgrammeComponent from "./components/Dashboard/UniversityAdminDashboard/Program/program";
-import UniversityComponent from "./components/Dashboard/UniversityAdminDashboard/Universities/Universities"; // <-- NEW
+import UniversityComponent from "./components/Dashboard/UniversityAdminDashboard/Universities/Universities";
+import UsersComponent from "./components/Dashboard/UniversityAdminDashboard/users/Users";
+import ResultsComponent from "./components/Dashboard/UniversityAdminDashboard/Results/results";
+import ApplicationComponent from "./components/Dashboard/UniversityAdminDashboard/Applications/Application";
+
+/* =============================
+   ADMIN CLUSTERS
+============================= */
+import ClusterComponent from "./components/Dashboard/UniversityAdminDashboard/Cluster/Cluster";
+
+/* =============================
+   ADMIN APPLICATION WINDOW
+============================= */
+import ApplicationWindowComponent from "./components/Dashboard/UniversityAdminDashboard/ApplicationWindow/ApplicationWindow";
+
+/* =============================
+   ADMIN PLACEMENTS (NEW)
+============================= */
+import PlacementComponent from "./components/Dashboard/UniversityAdminDashboard/placements/Placements";
 
 function App() {
   return (
@@ -58,7 +76,10 @@ function App() {
 
           {/* ===== DASHBOARD APPLICATIONS ===== */}
           <Route path="/dashboard/applications" element={<Applications />} />
-          <Route path="/dashboard/application/:userID" element={<Applications />} />
+          <Route
+            path="/dashboard/application/:userID"
+            element={<Applications />}
+          />
 
           {/* ===== PROGRAMME → UNIVERSITY FLOW ===== */}
           <Route
@@ -86,9 +107,30 @@ function App() {
 
           {/* ===== UNIVERSITY ADMIN DASHBOARD ===== */}
           <Route path="/university" element={<UniversityDashboard />} />
-          {/* MATCH SIDEBAR LINK EXACTLY */}
           <Route path="/university/programs" element={<ProgrammeComponent />} />
-          <Route path="/university/manage" element={<UniversityComponent />} /> {/* <-- NEW */}
+          <Route path="/university/manage" element={<UniversityComponent />} />
+          <Route path="/university/users" element={<UsersComponent />} />
+          <Route path="/university/results" element={<ResultsComponent />} />
+
+          {/* ===== ADMIN APPLICATIONS ===== */}
+          <Route path="/admin/applications" element={<ApplicationComponent />} />
+
+          {/* ===== ADMIN APPLICATION WINDOW ===== */}
+          <Route
+            path="/admin/application-window"
+            element={<ApplicationWindowComponent />}
+          />
+
+          {/* ===== ADMIN PLACEMENTS (NEW ROUTE) ===== */}
+          <Route
+            path="/admin/placements"
+            element={<PlacementComponent />}
+          />
+
+          {/* ===== ADMIN ALIASES ===== */}
+          <Route path="/admin/users" element={<UsersComponent />} />
+          <Route path="/admin/results" element={<ResultsComponent />} />
+          <Route path="/admin/clusters" element={<ClusterComponent />} />
         </Routes>
       </BrowserRouter>
 

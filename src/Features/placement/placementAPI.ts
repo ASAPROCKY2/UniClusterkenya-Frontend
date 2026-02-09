@@ -7,21 +7,18 @@ import type { RootState } from "../../app/store";
    TYPES
 ============================= */
 
-// University / Institution attached to programme
 export type TPlacementUniversity = {
   universityID: number;
   name: string;
 };
 
-// Programme attached to placement
 export type TPlacementProgramme = {
   programmeID: number;
   name: string;
   level?: string | null;
-  university?: TPlacementUniversity | null; 
+  university?: TPlacementUniversity | null;
 };
 
-// Placement type (matches PlacementsTable + relations)
 export type TPlacement = {
   placementID: number;
   userID: number;
@@ -30,7 +27,6 @@ export type TPlacement = {
   programme: TPlacementProgramme;
 };
 
-// Payload for creating a placement
 export type TCreatePlacementPayload = {
   userID: number;
   programmeID: number;
@@ -38,7 +34,6 @@ export type TCreatePlacementPayload = {
   placementDate?: string;
 };
 
-// Payload for updating placement
 export type TUpdatePlacementPayload = {
   placementID: number;
   updates: Partial<{
@@ -75,24 +70,24 @@ export const placementAPI = createApi({
        QUERIES
     ============================= */
 
-    // 🔹 Get all placements (admin)
+    // Admin – all placements
     getAllPlacements: builder.query<TPlacement[], void>({
       query: () => "/placement",
-      transformResponse: (response: { data: TPlacement[] }) => response.data,
+      transformResponse: (res: { data: TPlacement[] }) => res.data,
       providesTags: ["Placements"],
     }),
 
-    // 🔹 Get placement by placementID
+    // Single placement
     getPlacementById: builder.query<TPlacement, number>({
       query: (placementID) => `/placement/${placementID}`,
-      transformResponse: (response: { data: TPlacement }) => response.data,
+      transformResponse: (res: { data: TPlacement }) => res.data,
       providesTags: ["Placements"],
     }),
 
-    // ⭐ Get placements for a specific user (STUDENT DASHBOARD)
+    // Student placements
     getPlacementsByUserId: builder.query<TPlacement[], number>({
       query: (userID) => `/placement/student/${userID}`,
-      transformResponse: (response: { data: TPlacement[] }) => response.data,
+      transformResponse: (res: { data: TPlacement[] }) => res.data,
       providesTags: ["Placements"],
     }),
 
@@ -100,20 +95,32 @@ export const placementAPI = createApi({
        MUTATIONS
     ============================= */
 
-    // 🔹 Create placement
+    // Manual placement
     createPlacement: builder.mutation<
       { message: string; data: TPlacement },
       TCreatePlacementPayload
     >({
-      query: (newPlacement) => ({
+      query: (payload) => ({
         url: "/placement",
         method: "POST",
-        body: newPlacement,
+        body: payload,
       }),
       invalidatesTags: ["Placements"],
     }),
 
-    // 🔹 Update placement
+    // ⭐ AUTO PLACEMENT (NEW)
+    autoPlacement: builder.mutation<
+      { message: string; data?: TPlacement[] },
+      void
+    >({
+      query: () => ({
+        url: "/placement/auto",
+        method: "POST",
+      }),
+      invalidatesTags: ["Placements"],
+    }),
+
+    // Update placement
     updatePlacement: builder.mutation<
       { message: string },
       TUpdatePlacementPayload
@@ -126,7 +133,7 @@ export const placementAPI = createApi({
       invalidatesTags: ["Placements"],
     }),
 
-    // 🔹 Delete placement
+    // Delete placement
     deletePlacement: builder.mutation<{ message: string }, number>({
       query: (placementID) => ({
         url: `/placement/${placementID}`,
@@ -146,6 +153,7 @@ export const {
   useGetPlacementByIdQuery,
   useGetPlacementsByUserIdQuery,
   useCreatePlacementMutation,
+  useAutoPlacementMutation, 
   useUpdatePlacementMutation,
   useDeletePlacementMutation,
 } = placementAPI;

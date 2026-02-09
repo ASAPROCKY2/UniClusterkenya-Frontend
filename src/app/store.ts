@@ -1,3 +1,4 @@
+// src/app/store.ts
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
   persistReducer,
@@ -19,7 +20,8 @@ import { universityAPI } from "../Features/universities/UniversityAPI";
 import { programmesAPI } from "../Features/programmes/ProgrammesAPI";
 import { placementAPI } from "../Features/placement/placementAPI";
 import { applicationAPI } from "../Features/application/applicationAPI";
-import { clusterAPI } from "../Features/Cluster/clusterAPI"; // ADDED: Cluster API
+import { clusterAPI } from "../Features/Cluster/clusterAPI";
+import { applicationWindowAPI } from "../Features/ApplicationWindow/applicationWindowAPI"; 
 
 // ===== REDUCERS =====
 import userReducer from "../Features/Login/UserSlice";
@@ -48,7 +50,8 @@ const rootReducer = combineReducers({
   [programmesAPI.reducerPath]: programmesAPI.reducer,
   [placementAPI.reducerPath]: placementAPI.reducer,
   [applicationAPI.reducerPath]: applicationAPI.reducer,
-  [clusterAPI.reducerPath]: clusterAPI.reducer, // ADDED: Cluster API reducer
+  [clusterAPI.reducerPath]: clusterAPI.reducer,
+  [applicationWindowAPI.reducerPath]: applicationWindowAPI.reducer, // NEW: Application Window reducer
 
   // Persisted slices
   user: userReducer,
@@ -74,14 +77,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [
-          FLUSH,
-          REHYDRATE,
-          PAUSE,
-          PERSIST,
-          PURGE,
-          REGISTER,
-        ],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }).concat(
       // RTK Query middleware
@@ -93,7 +89,8 @@ export const store = configureStore({
       programmesAPI.middleware,
       placementAPI.middleware,
       applicationAPI.middleware,
-      clusterAPI.middleware // ADDED: Cluster API middleware
+      clusterAPI.middleware,
+      applicationWindowAPI.middleware // NEW: Application Window middleware
     ),
 });
 

@@ -6,6 +6,12 @@ import type { RootState } from "../../app/store";
    TYPES
 ============================= */
 
+export type TStudent = {
+  userID: number;
+  firstName: string;
+  lastName: string;
+};
+
 export type TApplicationProgramme = {
   programmeID: number;
   name: string;
@@ -20,11 +26,12 @@ export type TApplication = {
   status: string;
   clusterScore?: string | null;
   programme: TApplicationProgramme;
+  student: TStudent; // <-- NEW: include student info
 };
 
 // Payload for creating an application
 export type TCreateApplicationPayload = {
-  userID: number;
+  userID: number; // backend supports userID or studentID
   programmeID: number;
   choiceOrder: number;
 };
@@ -48,7 +55,7 @@ export type TApplicationWindow = {
   isActive: boolean;
 };
 
-// NEW: cluster subject for validation
+// Cluster subject for validation
 export type TClusterSubject = {
   id: number;
   subjectCode: string;
@@ -95,7 +102,7 @@ export const applicationAPI = createApi({
       providesTags: ["Applications"],
     }),
 
-    // NEW: fetch cluster subjects for a programme for frontend validation
+    // Fetch cluster subjects for a programme
     getProgrammeClusterSubjects: builder.query<TClusterSubject[], number>({
       query: (programmeID) => `/programmes/${programmeID}/clusters-with-subjects`,
       transformResponse: (res: { data: TClusterSubject[] }) => res.data,

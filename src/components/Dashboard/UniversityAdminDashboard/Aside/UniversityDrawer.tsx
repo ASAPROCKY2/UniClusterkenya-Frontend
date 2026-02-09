@@ -11,7 +11,7 @@ const UniversityDrawer = () => {
       {/* Header */}
       <div className="p-4 border-b border-gray-800">
         <h2 className="text-xl font-bold tracking-wide">
-          University Admin
+          Admin Dashboard
         </h2>
         <p className="text-sm text-gray-400">
           UniCluster Kenya
@@ -21,7 +21,7 @@ const UniversityDrawer = () => {
       {/* Navigation */}
       <ul className="flex-1 py-2">
         {universityAdminDrawerData.map((item) => {
-          const isActive = location.pathname === item.link;
+          const isActive = location.pathname.startsWith(item.link);
 
           return (
             <li key={item.id}>

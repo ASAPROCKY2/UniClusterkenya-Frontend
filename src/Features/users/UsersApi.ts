@@ -18,7 +18,7 @@ export type TAuthUser = {
   image_url?: string | null;
 };
 
-// 📝 Register payload
+//  Register payload
 export type TRegisterUser = {
   firstName: string;
   lastName: string;

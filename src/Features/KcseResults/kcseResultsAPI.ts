@@ -1,5 +1,26 @@
+// src/features/kcseresults/kcseResultsAPI.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../../utilis/APiDomain";
+
+/* =============================
+   TYPES
+============================= */
+
+// Student details now included in the API response
+export type TStudent = {
+  userID: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  gender?: string;
+  citizenship?: string;
+  highSchool?: string;
+  kcseIndex?: string;
+  meanGrade?: string;
+  agp?: number;
+  photoURL?: string;
+};
 
 export type TKcseSubjectResult = {
   resultID: number;
@@ -8,6 +29,7 @@ export type TKcseSubjectResult = {
   subjectName: string;
   grade: string;
   points: number;
+  student?: TStudent; // <-- New field added
 };
 
 export type TCreateKcseResult = {
@@ -27,6 +49,9 @@ export type TUpdateKcseResult = Partial<{
   points: number;
 }>;
 
+/* =============================
+   API
+============================= */
 export const kcseResultsAPI = createApi({
   reducerPath: "kcseResultsAPI",
   baseQuery: fetchBaseQuery({
@@ -38,6 +63,7 @@ export const kcseResultsAPI = createApi({
   }),
   tagTypes: ["KcseResults"],
   endpoints: (builder) => ({
+    /* CREATE KCSE RESULTS */
     createKcseResult: builder.mutation<
       { message: string; data: TKcseSubjectResult[] },
       TCreateKcseResult
@@ -50,6 +76,7 @@ export const kcseResultsAPI = createApi({
       invalidatesTags: ["KcseResults"],
     }),
 
+    /* GET ALL KCSE RESULTS (WITH STUDENT INFO) */
     getAllKcseResults: builder.query<TKcseSubjectResult[], void>({
       query: () => "/kcseresult",
       transformResponse: (response: { data: TKcseSubjectResult[] }) =>
@@ -57,6 +84,7 @@ export const kcseResultsAPI = createApi({
       providesTags: ["KcseResults"],
     }),
 
+    /* GET KCSE RESULTS BY USER ID (WITH STUDENT INFO) */
     getKcseResultsByUserId: builder.query<TKcseSubjectResult[], number>({
       query: (userID) => `/kcseresult/user/${userID}`,
       transformResponse: (response: { data: TKcseSubjectResult[] }) =>
@@ -64,6 +92,7 @@ export const kcseResultsAPI = createApi({
       providesTags: ["KcseResults"],
     }),
 
+    /* UPDATE KCSE RESULTS BY USER ID */
     updateKcseResultsByUserId: builder.mutation<
       { message: string },
       { userID: number; updates: TUpdateKcseResult }
@@ -76,6 +105,7 @@ export const kcseResultsAPI = createApi({
       invalidatesTags: ["KcseResults"],
     }),
 
+    /* DELETE KCSE RESULTS BY USER ID */
     deleteKcseResultsByUserId: builder.mutation<{ message: string }, number>({
       query: (userID) => ({
         url: `/kcseresult/user/${userID}`,
@@ -86,6 +116,9 @@ export const kcseResultsAPI = createApi({
   }),
 });
 
+/* =============================
+   HOOKS
+============================= */
 export const {
   useCreateKcseResultMutation,
   useGetAllKcseResultsQuery,

@@ -1,84 +1,70 @@
-// src/components/Dashboard/AdminDashboard/ManageUniversities/University.tsx
+// src/components/Dashboard/AdminDashboard/ManageApplicationWindows/ApplicationWindow.tsx
 
 import React, { useState } from "react";
-import { FaUniversity, FaEdit } from "react-icons/fa";
+import { FaCalendarAlt, FaEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { RiCloseCircleFill } from "react-icons/ri";
-import { MapPin, ShieldCheck, Award } from "lucide-react";
 import { Skeleton } from "../../../../components/ui/skeleton";
 import {
-  universityAPI,
-  type TUniversity,
-} from "../../../../Features/universities/UniversityAPI";
+  applicationWindowAPI,
+  type TApplicationWindow,
+} from "../../../../Features/ApplicationWindow/applicationWindowAPI";
 
-import CreateUniversity from "./CreateUniversity";
-import UpdateUniversity from "./UpdateUniversity";
-import DeleteUniversity from "./DeleteUniversity";
+import CreateApplicationWindow from "./createApplicationWindow";
+import UpdateApplicationWindow from "./UpdateApplicationWindow";
+import DeleteApplicationWindow from "./DeleteApplicationWindow";
 
-const UniversityComponent: React.FC = () => {
-  const { data: universitiesData, isLoading, error } =
-    universityAPI.useGetAllUniversitiesQuery(undefined, {
+const ApplicationWindowComponent: React.FC = () => {
+  const { data: windowsData, isLoading, error } =
+    applicationWindowAPI.useGetAllApplicationWindowsQuery(undefined, {
       refetchOnMountOrArgChange: true,
     });
 
-  const [selectedUniversity, setSelectedUniversity] =
-    useState<TUniversity | null>(null);
-  const [universityToDelete, setUniversityToDelete] =
-    useState<TUniversity | null>(null);
+  const [selectedWindow, setSelectedWindow] = useState<TApplicationWindow | null>(null);
+  const [windowToDelete, setWindowToDelete] = useState<TApplicationWindow | null>(null);
 
-  const handleEdit = (university: TUniversity) => {
-    setSelectedUniversity(university);
-    (
-      document.getElementById("update_university_modal") as HTMLDialogElement
-    )?.showModal();
+  const handleEdit = (window: TApplicationWindow) => {
+    setSelectedWindow(window);
+    (document.getElementById("update_window_modal") as HTMLDialogElement)?.showModal();
   };
 
-  const handleDelete = (university: TUniversity) => {
-    setUniversityToDelete(university);
-    (
-      document.getElementById("delete_university_modal") as HTMLDialogElement
-    )?.showModal();
+  const handleDelete = (window: TApplicationWindow) => {
+    setWindowToDelete(window);
+    (document.getElementById("delete_window_modal") as HTMLDialogElement)?.showModal();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-2xl">
-
       {/* Modals */}
-      <CreateUniversity />
-      <UpdateUniversity university={selectedUniversity} />
-      <DeleteUniversity university={universityToDelete} />
+      <CreateApplicationWindow />
+      <UpdateApplicationWindow window={selectedWindow} />
+      <DeleteApplicationWindow window={windowToDelete} />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <FaUniversity className="text-blue-600" />
-            Universities
+            <FaCalendarAlt className="text-blue-600" />
+            Application Windows
           </h2>
           <p className="text-sm text-gray-500 mt-1">
-            Manage all universities in the system
+            Manage all application windows in the system
           </p>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="px-4 py-2 bg-white rounded-xl border border-gray-200 shadow-sm">
-            <span className="font-semibold text-blue-600">
-              {universitiesData?.length || 0}
-            </span>{" "}
-            <span className="text-gray-500">universities</span>
+            <span className="font-semibold text-blue-600">{windowsData?.length || 0}</span>{" "}
+            <span className="text-gray-500">windows</span>
           </div>
 
           <button
             onClick={() =>
-              (
-                document.getElementById(
-                  "create_university_modal"
-                ) as HTMLDialogElement
-              )?.showModal()
+              (document.getElementById("create_window_modal") as HTMLDialogElement)?.showModal()
             }
             className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
           >
-            + Add University
+            + Add Window
           </button>
         </div>
       </div>
@@ -104,74 +90,57 @@ const UniversityComponent: React.FC = () => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 flex items-center gap-3">
           <RiCloseCircleFill className="text-xl" />
           <div>
-            <p className="font-medium">Error loading universities</p>
+            <p className="font-medium">Error loading application windows</p>
             <p className="text-sm">Please refresh or try again later</p>
           </div>
         </div>
       )}
 
-      {/* Universities Grid */}
-      {universitiesData?.length ? (
+      {/* Windows Grid */}
+      {windowsData?.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {universitiesData.map((uni) => (
+          {windowsData.map((win) => (
             <div
-              key={uni.universityID}
+              key={win.windowID}
               className="group bg-white rounded-3xl border border-gray-100 shadow-md hover:shadow-xl transition-all p-6"
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-5">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-bold text-gray-800 truncate group-hover:text-blue-700">
-                    {uni.name}
+                    {win.name}
                   </h3>
 
                   <span
                     className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                      uni.type === "public"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-purple-100 text-purple-700"
+                      win.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {uni.type?.toUpperCase() || "UNIVERSITY"}
+                    {win.isActive ? "ACTIVE" : "INACTIVE"}
                   </span>
                 </div>
-
-                {/* Logo */}
-                {uni.logoURL ? (
-                  <img
-                    src={uni.logoURL}
-                    alt={`${uni.name} logo`}
-                    className="w-16 h-16 rounded-2xl object-cover border border-gray-200"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-xl font-bold text-blue-700">
-                    {uni.name?.charAt(0).toUpperCase()}
-                  </div>
-                )}
               </div>
 
               {/* Details */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-700">
-                    {uni.county || "Location not specified"}
+                    Start: {new Date(win.startDate).toLocaleDateString()}
                   </span>
                 </div>
-
                 <div className="flex items-center gap-3">
-                  <Award className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-700">
-                    {uni.governmentScholarship
-                      ? "Government Scholarship Available"
-                      : "No Government Scholarship"}
+                    End: {new Date(win.endDate).toLocaleDateString()}
                   </span>
                 </div>
-
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-700">
-                    {uni.helbEligible ? "HELB Eligible" : "Not HELB Eligible"}
+                    Total Slots: {win.totalSlots}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-700">
+                    Available Slots: {win.availableSlots}
                   </span>
                 </div>
               </div>
@@ -179,7 +148,7 @@ const UniversityComponent: React.FC = () => {
               {/* Actions */}
               <div className="flex gap-3">
                 <button
-                  onClick={() => handleEdit(uni)}
+                  onClick={() => handleEdit(win)}
                   className="flex-1 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-xl hover:bg-blue-100 transition flex items-center justify-center gap-2"
                 >
                   <FaEdit />
@@ -187,7 +156,7 @@ const UniversityComponent: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={() => handleDelete(uni)}
+                  onClick={() => handleDelete(win)}
                   className="flex-1 py-2 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition flex items-center justify-center gap-2"
                 >
                   <MdDeleteForever />
@@ -200,12 +169,12 @@ const UniversityComponent: React.FC = () => {
       ) : (
         !isLoading && (
           <div className="text-center py-20 bg-white rounded-3xl border border-gray-200 shadow-sm">
-            <FaUniversity size={72} className="mx-auto text-gray-300 mb-4" />
+            <FaCalendarAlt size={72} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700">
-              No universities available
+              No application windows available
             </h3>
             <p className="text-gray-500 mt-2">
-              Create a university to get started
+              Create an application window to get started
             </p>
           </div>
         )
@@ -214,4 +183,4 @@ const UniversityComponent: React.FC = () => {
   );
 };
 
-export default UniversityComponent;
+export default ApplicationWindowComponent;

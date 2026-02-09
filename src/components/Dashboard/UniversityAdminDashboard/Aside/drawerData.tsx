@@ -5,6 +5,11 @@ import {
   FaBook,
   FaClipboardList,
   FaUserGraduate,
+  FaUniversity,
+  FaProjectDiagram,
+  FaBullseye,
+  FaWindowRestore,
+  FaChartBar,
   FaSignOutAlt,
 } from "react-icons/fa";
 
@@ -20,26 +25,65 @@ export const universityAdminDrawerData: DrawerData[] = [
     id: "dashboard-overview",
     name: "Dashboard Overview",
     icon: FaTachometerAlt,
-    link: "/university/dashboard",
+    link: "/admin/dashboard",
   },
+
+  {
+    id: "universities",
+    name: "Universities",
+    icon: FaUniversity,
+    link: "/admin/universities",
+  },
+
   {
     id: "programs",
-    name: "Programs",
+    name: "Programmes",
     icon: FaBook,
-    link: "/university/programs",
+    link: "/admin/programmes",
   },
+
+  {
+    id: "clusters",
+    name: "Programme Clusters",
+    icon: FaProjectDiagram,
+    link: "/admin/clusters",
+  },
+
+  {
+    id: "results",
+    name: "KCSE Results",
+    icon: FaChartBar,
+    link: "/admin/results",
+  },
+
   {
     id: "applications",
     name: "Applications",
     icon: FaClipboardList,
-    link: "/university/applications",
+    link: "/admin/applications",
   },
+
   {
-    id: "students",
-    name: "Students",
-    icon: FaUserGraduate,
-    link: "/university/students",
+    id: "application-window",
+    name: "Application Window",
+    icon: FaWindowRestore,
+    link: "/admin/application-window",
   },
+
+  {
+    id: "placements",
+    name: "Placements",
+    icon: FaBullseye,
+    link: "/admin/placements",
+  },
+
+  {
+    id: "users",
+    name: "Users",
+    icon: FaUserGraduate,
+    link: "/admin/users",
+  },
+
   {
     id: "logout",
     name: "Logout",
