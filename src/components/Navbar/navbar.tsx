@@ -92,7 +92,7 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link to="/universities" className="text-base lg:text-lg font-medium">
+            <Link to="/dashboard/universities" className="text-base lg:text-lg font-medium">
               Universities
             </Link>
           </li>

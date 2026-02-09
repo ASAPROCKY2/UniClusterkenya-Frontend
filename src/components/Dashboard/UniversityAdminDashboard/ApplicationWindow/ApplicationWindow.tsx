@@ -1,5 +1,4 @@
 // src/components/Dashboard/AdminDashboard/ManageApplicationWindows/ApplicationWindow.tsx
-
 import React, { useState } from "react";
 import { FaCalendarAlt, FaEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
@@ -23,6 +22,9 @@ const ApplicationWindowComponent: React.FC = () => {
   const [selectedWindow, setSelectedWindow] = useState<TApplicationWindow | null>(null);
   const [windowToDelete, setWindowToDelete] = useState<TApplicationWindow | null>(null);
 
+  // Control modal display
+  const [showCreate, setShowCreate] = useState(false);
+
   const handleEdit = (window: TApplicationWindow) => {
     setSelectedWindow(window);
     (document.getElementById("update_window_modal") as HTMLDialogElement)?.showModal();
@@ -33,10 +35,17 @@ const ApplicationWindowComponent: React.FC = () => {
     (document.getElementById("delete_window_modal") as HTMLDialogElement)?.showModal();
   };
 
+  const handleCreateOpen = () => {
+    setShowCreate(true);
+    setTimeout(() => {
+      (document.getElementById("create_window_modal") as HTMLDialogElement)?.showModal();
+    }, 0);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-2xl">
       {/* Modals */}
-      <CreateApplicationWindow />
+      {showCreate && <CreateApplicationWindow />}
       <UpdateApplicationWindow window={selectedWindow} />
       <DeleteApplicationWindow window={windowToDelete} />
 
@@ -59,9 +68,7 @@ const ApplicationWindowComponent: React.FC = () => {
           </div>
 
           <button
-            onClick={() =>
-              (document.getElementById("create_window_modal") as HTMLDialogElement)?.showModal()
-            }
+            onClick={handleCreateOpen}
             className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
           >
             + Add Window
@@ -174,7 +181,7 @@ const ApplicationWindowComponent: React.FC = () => {
               No application windows available
             </h3>
             <p className="text-gray-500 mt-2">
-              Create an application window to get started
+              Click “Add Window” to get started
             </p>
           </div>
         )

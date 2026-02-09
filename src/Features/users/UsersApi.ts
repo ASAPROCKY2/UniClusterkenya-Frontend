@@ -53,7 +53,7 @@ export type TLoginResponse = {
   user: TAuthUser;
 };
 
-// 👤 Full user (admin / profile)
+//  Full user (admin / profile)
 export type TUser = {
   userID: number;
   email: string;
@@ -154,8 +154,8 @@ export const userAPI = createApi({
         agp: response.data.agp,
         photoURL: response.data.photoURL,
         createdAt: response.data.createdAt,
-        gender: response.data.gender,          // ✅ added
-        highSchool: response.data.highSchool,  // ✅ added
+        gender: response.data.gender,         
+        highSchool: response.data.highSchool,  
       }),
     }),
 

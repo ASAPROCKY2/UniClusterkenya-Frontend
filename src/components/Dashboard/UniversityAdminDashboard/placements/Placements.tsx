@@ -1,13 +1,9 @@
 // src/components/Dashboard/AdminDashboard/Placements/Placement.tsx
-
 import React from "react";
 import { GraduationCap, PlayCircle } from "lucide-react";
 import { RiCloseCircleFill } from "react-icons/ri";
 import { Skeleton } from "../../../../components/ui/skeleton";
-import {
-  placementAPI,
-  type TPlacement,
-} from "../../../../Features/placement/placementAPI";
+import { placementAPI, type TPlacement } from "../../../../Features/placement/placementAPI";
 import { toast } from "sonner";
 
 const PlacementComponent: React.FC = () => {
@@ -20,18 +16,16 @@ const PlacementComponent: React.FC = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  const [autoPlacement, { isLoading: isAutoPlacing }] =
-    placementAPI.useAutoPlacementMutation();
+  const [autoPlacement, { isLoading: isAutoPlacing }] = placementAPI.useAutoPlacementMutation();
 
   const handleAutoPlacement = async () => {
     try {
-      const res = await autoPlacement().unwrap();
+      const currentYear = new Date().getFullYear();
+      const res = await autoPlacement({ year: currentYear }).unwrap();
       toast.success(res.message || "Auto placement completed successfully");
       refetch();
     } catch (err: any) {
-      toast.error(
-        err?.data?.message || "Auto placement failed. Try again."
-      );
+      toast.error(err?.data?.message || "Auto placement failed. Try again.");
     }
   };
 
@@ -51,9 +45,7 @@ const PlacementComponent: React.FC = () => {
 
         <div className="flex items-center gap-4">
           <div className="px-4 py-2 bg-white rounded-xl border border-gray-200 shadow-sm">
-            <span className="font-semibold text-indigo-600">
-              {placements?.length || 0}
-            </span>{" "}
+            <span className="font-semibold text-indigo-600">{placements?.length || 0}</span>{" "}
             <span className="text-gray-500">placements</span>
           </div>
 
@@ -72,10 +64,7 @@ const PlacementComponent: React.FC = () => {
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-2xl p-6 border border-gray-200"
-            >
+            <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200">
               <Skeleton className="h-6 w-3/4 mb-3" />
               <Skeleton className="h-4 w-1/2 mb-2" />
               <Skeleton className="h-4 w-2/3" />
@@ -98,51 +87,61 @@ const PlacementComponent: React.FC = () => {
       {/* Placements Grid */}
       {placements?.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {placements.map((placement: TPlacement) => (
-            <div
-              key={placement.placementID}
-              className="bg-white rounded-3xl border border-gray-100 shadow-md hover:shadow-xl transition-all p-6"
-            >
-              {/* Programme */}
-              <h3 className="text-lg font-bold text-gray-800 mb-1">
-                {placement.programme?.name}
-              </h3>
+          {placements.map((placement: TPlacement) => {
+            const universityName =
+              placement.programme?.university?.name ||
+              placement.university?.name ||
+              "N/A";
 
-              <p className="text-sm text-gray-500 mb-3">
-                {placement.programme?.level || "Programme level not specified"}
-              </p>
+            const studentName = placement.student
+              ? `${placement.student.firstName || ""} ${placement.student.lastName || ""}`.trim() || "Student info unavailable"
+              : "Student info unavailable";
 
-              {/* University */}
-              <div className="text-sm text-gray-700 mb-4">
-                <span className="font-semibold">University:</span>{" "}
-                {placement.programme?.university?.name || "N/A"}
-              </div>
+            const placementStatus = placement.placementStatus || "N/A";
 
-              {/* Student */}
-              <div className="text-sm text-gray-700 mb-2">
-                <span className="font-semibold">Student ID:</span>{" "}
-                {placement.userID}
-              </div>
+            const placementDate = placement.placementDate
+              ? new Date(placement.placementDate).toLocaleDateString()
+              : "Date not recorded";
 
-              {/* Status */}
-              <span
-                className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
-                  placement.placementStatus === "placed"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
+            return (
+              <div
+                key={placement.placementID}
+                className="bg-white rounded-3xl border border-gray-100 shadow-md hover:shadow-xl transition-all p-6"
               >
-                {placement.placementStatus.toUpperCase()}
-              </span>
+                {/* Programme */}
+                <h3 className="text-lg font-bold text-gray-800 mb-1">
+                  {placement.programme?.name || "Programme N/A"}
+                </h3>
+                <p className="text-sm text-gray-500 mb-3">
+                  {placement.programme?.level || "Programme level not specified"}
+                </p>
 
-              {/* Date */}
-              <p className="text-xs text-gray-400 mt-2">
-                {placement.placementDate
-                  ? new Date(placement.placementDate).toLocaleDateString()
-                  : "Date not recorded"}
-              </p>
-            </div>
-          ))}
+                {/* University */}
+                <div className="text-sm text-gray-700 mb-4">
+                  <span className="font-semibold">University:</span> {universityName}
+                </div>
+
+                {/* Student */}
+                <div className="text-sm text-gray-700 mb-2">
+                  <span className="font-semibold">Student:</span> {studentName}
+                </div>
+
+                {/* Status */}
+                <span
+                  className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
+                    placementStatus.toLowerCase() === "placed"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {placementStatus.toUpperCase()}
+                </span>
+
+                {/* Date */}
+                <p className="text-xs text-gray-400 mt-2">{placementDate}</p>
+              </div>
+            );
+          })}
         </div>
       ) : (
         !isLoading && (

@@ -20,6 +20,7 @@ const ProgrammeComponent: React.FC = () => {
 
   const [selectedProgramme, setSelectedProgramme] = useState<TProgramme | null>(null);
   const [programmeToDelete, setProgrammeToDelete] = useState<TProgramme | null>(null);
+  const [showCreate, setShowCreate] = useState(false); // only open when button clicked
 
   const handleEdit = (programme: TProgramme) => {
     setSelectedProgramme(programme);
@@ -31,11 +32,18 @@ const ProgrammeComponent: React.FC = () => {
     (document.getElementById("delete_programme_modal") as HTMLDialogElement)?.showModal();
   };
 
+  const handleCreateOpen = () => {
+    setShowCreate(true);
+    setTimeout(() => {
+      (document.getElementById("create_programme_modal") as HTMLDialogElement)?.showModal();
+    }, 0);
+  };
+
   return (
     <div className="p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-lg">
 
       {/* Modals */}
-      <CreateProgramme />
+      {showCreate && <CreateProgramme />}
       <UpdateProgramme programme={selectedProgramme} />
       <DeleteProgramme programme={programmeToDelete} />
 
@@ -52,6 +60,8 @@ const ProgrammeComponent: React.FC = () => {
             Manage all university programmes
           </p>
         </div>
+
+        {/* Stats + Create Button */}
         <div className="flex items-center gap-4">
           <div className="px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm">
             <span className="font-medium text-blue-600">
@@ -60,12 +70,10 @@ const ProgrammeComponent: React.FC = () => {
             <span className="text-gray-500 ml-1">programmes</span>
           </div>
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            onClick={() =>
-              (document.getElementById("create_programme_modal") as HTMLDialogElement)?.showModal()
-            }
+            onClick={handleCreateOpen}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
           >
-            + Add Programme
+            + Create Programme
           </button>
         </div>
       </div>
@@ -109,7 +117,10 @@ const ProgrammeComponent: React.FC = () => {
                   Level
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Cluster
+                  University
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Cluster(s)
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Actions
@@ -119,9 +130,29 @@ const ProgrammeComponent: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {programmesData.map((programme) => (
                 <tr key={programme.programmeID} className="hover:bg-blue-50/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{(programme as any).programmeName ?? (programme as any).name ?? "—"}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-700">{(programme as any).programmeLevel ?? (programme as any).level ?? "—"}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{(programme as any).clusterName ?? (programme as any).cluster?.name ?? (programme as any).cluster_name ?? "—"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                    {programme.name ?? "—"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                    {programme.level ?? "—"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                    { (programme as any).university?.name ?? "—" }
+                    { (programme as any).university?.type && (
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${
+                        (programme as any).university.type === "public"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-purple-100 text-purple-700"
+                      }`}>
+                        {(programme as any).university.type.toUpperCase()}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                    {programme.clusters && programme.clusters.length > 0
+                      ? programme.clusters.map(c => c.name).join(", ")
+                      : "—"}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex space-x-3">
                       <button
@@ -155,7 +186,7 @@ const ProgrammeComponent: React.FC = () => {
               No programmes available
             </h3>
             <p className="mt-2 text-gray-500 max-w-md mx-auto">
-              You can create a new programme using the button above
+              Click “Create Programme” to get started
             </p>
           </div>
         )

@@ -39,7 +39,7 @@ export const universityAdminDrawerData: DrawerData[] = [
     id: "programs",
     name: "Programmes",
     icon: FaBook,
-    link: "/admin/programmes",
+    link: "/admin/programs",
   },
 
   {

@@ -106,11 +106,11 @@ function App() {
           />
 
           {/* ===== UNIVERSITY ADMIN DASHBOARD ===== */}
-          <Route path="/university" element={<UniversityDashboard />} />
-          <Route path="/university/programs" element={<ProgrammeComponent />} />
-          <Route path="/university/manage" element={<UniversityComponent />} />
-          <Route path="/university/users" element={<UsersComponent />} />
-          <Route path="/university/results" element={<ResultsComponent />} />
+          <Route path="/admin/dashboard" element={<UniversityDashboard />} />
+          <Route path="/admin/programs" element={<ProgrammeComponent />} />
+          <Route path="/admin/universities" element={<UniversityComponent />} />
+          <Route path="/admin/users" element={<UsersComponent />} />
+          <Route path="/admin/results" element={<ResultsComponent />} />
 
           {/* ===== ADMIN APPLICATIONS ===== */}
           <Route path="/admin/applications" element={<ApplicationComponent />} />
@@ -122,14 +122,9 @@ function App() {
           />
 
           {/* ===== ADMIN PLACEMENTS (NEW ROUTE) ===== */}
-          <Route
-            path="/admin/placements"
-            element={<PlacementComponent />}
-          />
+          <Route path="/admin/placements" element={<PlacementComponent />} />
 
-          {/* ===== ADMIN ALIASES ===== */}
-          <Route path="/admin/users" element={<UsersComponent />} />
-          <Route path="/admin/results" element={<ResultsComponent />} />
+          {/* ===== ADMIN CLUSTERS ===== */}
           <Route path="/admin/clusters" element={<ClusterComponent />} />
         </Routes>
       </BrowserRouter>

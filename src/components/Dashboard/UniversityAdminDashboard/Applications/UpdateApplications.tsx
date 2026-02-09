@@ -1,5 +1,3 @@
-// src/components/Dashboard/AdminDashboard/Applications/UpdateApplication.tsx
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -8,14 +6,40 @@ import {
   type TUpdateApplicationPayload,
 } from "../../../../Features/application/applicationAPI";
 
+/* =============================
+   APPLICATION STATUS ENUM
+   (MUST MATCH DB ENUM)
+============================= */
+const APPLICATION_STATUSES = [
+  "pending",
+  "confirmed",
+  "rejected",
+  "under_review",
+  "accepted",
+  "withdrawn",
+] as const;
+
+/* =============================
+   LABELS FOR UI ONLY
+============================= */
+const STATUS_LABELS: Record<(typeof APPLICATION_STATUSES)[number], string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  rejected: "Rejected",
+  under_review: "Under Review",
+  accepted: "Accepted",
+  withdrawn: "Withdrawn",
+};
+
 type UpdateApplicationProps = {
   application: TApplication | null;
 };
 
 const UpdateApplication = ({ application }: UpdateApplicationProps) => {
-  const [updateApplication, { isLoading }] = applicationAPI.useUpdateApplicationMutation({
-    fixedCacheKey: "updateApplication",
-  });
+  const [updateApplication, { isLoading }] =
+    applicationAPI.useUpdateApplicationMutation({
+      fixedCacheKey: "updateApplication",
+    });
 
   const [formData, setFormData] = useState<{
     choiceOrder: string;
@@ -27,7 +51,9 @@ const UpdateApplication = ({ application }: UpdateApplicationProps) => {
     clusterScore: "",
   });
 
-  // Populate form when application changes
+  /* =============================
+     POPULATE FORM
+  ============================= */
   useEffect(() => {
     if (application) {
       setFormData({
@@ -45,6 +71,9 @@ const UpdateApplication = ({ application }: UpdateApplicationProps) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /* =============================
+     UPDATE HANDLER
+  ============================= */
   const handleUpdate = async () => {
     if (!application) {
       toast.error("No application selected for update.");
@@ -53,18 +82,27 @@ const UpdateApplication = ({ application }: UpdateApplicationProps) => {
 
     try {
       const updates: TUpdateApplicationPayload["updates"] = {
-        choiceOrder: formData.choiceOrder ? Number(formData.choiceOrder) : undefined,
+        choiceOrder: formData.choiceOrder
+          ? Number(formData.choiceOrder)
+          : undefined,
         status: formData.status || undefined,
         clusterScore: formData.clusterScore || undefined,
       };
 
-      await updateApplication({ applicationID: application.applicationID, updates }).unwrap();
+      await updateApplication({
+        applicationID: application.applicationID,
+        updates,
+      }).unwrap();
 
       toast.success("Application updated successfully!");
-      (document.getElementById("update_application_modal") as HTMLDialogElement)?.close();
+      (
+        document.getElementById(
+          "update_application_modal"
+        ) as HTMLDialogElement
+      )?.close();
     } catch (error) {
       console.error("Error updating application:", error);
-      toast.error("Failed to update application. Please try again.");
+      toast.error("Failed to update application.");
     }
   };
 
@@ -74,6 +112,7 @@ const UpdateApplication = ({ application }: UpdateApplicationProps) => {
         <h3 className="font-bold text-lg mb-4">Update Application</h3>
 
         <form className="flex flex-col gap-4">
+          {/* Choice Order */}
           <input
             name="choiceOrder"
             type="number"
@@ -84,15 +123,24 @@ const UpdateApplication = ({ application }: UpdateApplicationProps) => {
             onChange={handleChange}
           />
 
-          <input
+          {/* ✅ STATUS DROPDOWN */}
+          <select
             name="status"
-            type="text"
-            placeholder="Status (e.g., Pending, Approved)"
-            className="input input-bordered"
+            className="select select-bordered text-gray-800"
             value={formData.status}
             onChange={handleChange}
-          />
+          >
+            <option value="" disabled>
+              Select Application Status
+            </option>
+            {APPLICATION_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {STATUS_LABELS[status]}
+              </option>
+            ))}
+          </select>
 
+          {/* Cluster Score */}
           <input
             name="clusterScore"
             type="text"
@@ -111,17 +159,22 @@ const UpdateApplication = ({ application }: UpdateApplicationProps) => {
           >
             {isLoading ? (
               <>
-                <span className="loading loading-spinner text-primary" /> Updating...
+                <span className="loading loading-spinner" /> Updating...
               </>
             ) : (
               "Save Changes"
             )}
           </button>
+
           <button
             className="btn"
             type="button"
             onClick={() =>
-              (document.getElementById("update_application_modal") as HTMLDialogElement)?.close()
+              (
+                document.getElementById(
+                  "update_application_modal"
+                ) as HTMLDialogElement
+              )?.close()
             }
           >
             Cancel

@@ -2,14 +2,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../../utilis/APiDomain";
 
 /* =============================
-   TYPES
+   TYPES (MATCH BACKEND)
 ============================= */
-
-export type TSProgrammeCluster = {
-  clusterID: number;
-  clusterCode: string;
-  name: string;
-};
 
 export type TClusterSubject = {
   id: number;
@@ -19,26 +13,24 @@ export type TClusterSubject = {
   alternativeGroup?: number | null;
 };
 
+export type TProgrammeCluster = {
+  clusterID: number;
+  clusterCode: string;
+  name: string;
+  subjects: TClusterSubject[];
+};
+
 export type TProgramme = {
   programmeID: number;
-  universityID: number;
   name: string;
   level?: string;
-  durationYears?: number;
-  minAGP?: number;
+  durationYears?: number | null;
+  minAGP?: number | null;
   helbEligible: boolean;
   scholarshipAvailable: boolean;
 
-  clusters?: TSProgrammeCluster[];
-
-  clusterSubjects?: Record<number, TClusterSubject[]>;
-
-  university?: {
-    universityID: number;
-    name: string;
-    type: string;
-    county?: string;
-  };
+  // KUCCPS-style requirements
+  clusters?: TProgrammeCluster[];
 };
 
 export type TCreateProgramme = {
@@ -80,7 +72,7 @@ export const programmesAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Programmes", "Clusters", "ClusterSubjects"],
+  tagTypes: ["Programmes", "Clusters"],
 
   endpoints: (builder) => ({
     /* =============================
@@ -93,6 +85,7 @@ export const programmesAPI = createApi({
       providesTags: ["Programmes"],
     }),
 
+    /** ✅ MAIN ENDPOINT FOR PROGRAMME DETAILS PAGE */
     getProgrammeById: builder.query<TProgramme, number>({
       query: (id) => `/programme/${id}`,
       transformResponse: (res: any) => res?.data ?? null,
@@ -136,7 +129,7 @@ export const programmesAPI = createApi({
     }),
 
     /* =============================
-       LOOKUPS (BUG FIXED HERE)
+       LOOKUPS
     ============================= */
 
     getProgrammeLevels: builder.query<
@@ -147,17 +140,10 @@ export const programmesAPI = createApi({
       transformResponse: (res: any) => res?.data ?? [],
     }),
 
-    // ✅ FIXED: matches backend GET /programme/clusters
-    getProgrammeClusters: builder.query<TSProgrammeCluster[], void>({
+    getProgrammeClusters: builder.query<TProgrammeCluster[], void>({
       query: () => "/programme/clusters",
       transformResponse: (res: any) => res?.data ?? [],
       providesTags: ["Clusters"],
-    }),
-
-    getClusterSubjectsByCluster: builder.query<TClusterSubject[], number>({
-      query: (clusterID) => `/cluster-subjects/cluster/${clusterID}`,
-      transformResponse: (res: any) => res?.data ?? [],
-      providesTags: ["ClusterSubjects"],
     }),
 
     /* =============================
@@ -183,7 +169,7 @@ export const programmesAPI = createApi({
 });
 
 /* =============================
-   EXPORT HOOKS (UNCHANGED)
+   EXPORT HOOKS
 ============================= */
 
 export const {
@@ -194,7 +180,6 @@ export const {
   useDeleteProgrammeByIdMutation,
   useGetProgrammeLevelsQuery,
   useGetProgrammeClustersQuery,
-  useGetClusterSubjectsByClusterQuery,
   useGetProgrammesByLevelQuery,
   useGetProgrammesByClusterQuery,
   useGetProgrammesWithFiltersQuery,

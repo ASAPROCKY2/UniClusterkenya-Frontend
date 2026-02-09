@@ -64,7 +64,15 @@ function Login() {
         throw new Error('Invalid server response');
       }
 
-      const { userID, firstname, lastname, email, role, kcseIndex, image_url } = response.user;
+      const {
+        userID,
+        firstname,
+        lastname,
+        email,
+        role,
+        kcseIndex,
+        image_url,
+      } = response.user;
 
       dispatch(
         loginSuccess({
@@ -83,9 +91,17 @@ function Login() {
 
       toast.success('Login successful');
 
-      if (role === 'student') navigate('/dashboard');
-      else if (role === 'university_admin') navigate('/university/dashboard');
-      else navigate('/admin/dashboard');
+      /* =========================
+         FIXED ROLE REDIRECT
+      ========================= */
+      if (role === 'student') {
+        navigate('/dashboard');
+      } else if (role === 'university_admin' || role === 'system_admin') {
+        navigate('/admin/dashboard');
+      } else {
+        toast.error('Unauthorized role');
+        navigate('/');
+      }
     } catch (err: any) {
       toast.error(
         err?.data?.message ||
@@ -108,29 +124,18 @@ function Login() {
             Smart University Placement System
           </p>
 
-          {/* Mission */}
           <div className="mt-10 bg-white/10 p-6 rounded-2xl border border-white/20">
             <p className="text-lg mb-4 opacity-90">
               Turning KCSE Results into University Opportunities
             </p>
 
             <ul className="space-y-3 text-sm">
-              <li className="flex gap-3">
-                <span>🎯</span>
-                <span>One application for multiple universities</span>
-              </li>
-              <li className="flex gap-3">
-                <span>📊</span>
-                <span>Fair, algorithm-based placement</span>
-              </li>
-              <li className="flex gap-3">
-                <span>⚡</span>
-                <span>Instant admission notifications</span>
-              </li>
+              <li className="flex gap-3"><span>🎯</span>One application for multiple universities</li>
+              <li className="flex gap-3"><span>📊</span>Fair, algorithm-based placement</li>
+              <li className="flex gap-3"><span>⚡</span>Instant admission notifications</li>
             </ul>
           </div>
 
-          {/* Simple Process Flow */}
           <div className="mt-10">
             <p className="font-semibold mb-3">How UniCluster Works</p>
             <div className="space-y-2 text-sm opacity-90">
@@ -141,7 +146,6 @@ function Login() {
             </div>
           </div>
 
-          {/* Note */}
           <div className="mt-8 p-4 bg-white/10 rounded-xl text-sm">
             <strong>Note:</strong> Students must enter KCSE Index Number.  
             Admin & University users log in with email only.
@@ -160,45 +164,30 @@ function Login() {
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">Welcome Back</h2>
-            <p className="text-gray-600">
-              Sign in to access your dashboard
-            </p>
+            <p className="text-gray-600">Sign in to access your dashboard</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Email */}
             <div>
-              <label className="text-sm font-medium text-gray-700">
-                Email Address
-              </label>
+              <label className="text-sm font-medium text-gray-700">Email Address</label>
               <input
                 type="email"
                 {...register('email')}
-                placeholder="user@example.com"
                 className="w-full mt-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500"
               />
-              {errors.email && (
-                <p className="text-sm text-red-600">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
             </div>
 
-            {/* Password */}
             <div>
-              <label className="text-sm font-medium text-gray-700">
-                Password
-              </label>
+              <label className="text-sm font-medium text-gray-700">Password</label>
               <input
                 type="password"
                 {...register('password')}
-                placeholder="••••••••"
                 className="w-full mt-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500"
               />
-              {errors.password && (
-                <p className="text-sm text-red-600">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
             </div>
 
-            {/* KCSE */}
             <div>
               <label className="text-sm font-medium text-gray-700">
                 KCSE Index Number (Students)
@@ -206,7 +195,6 @@ function Login() {
               <input
                 type="text"
                 {...register('kcseIndex')}
-                placeholder="1234567890/2023"
                 className="w-full mt-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500"
               />
             </div>

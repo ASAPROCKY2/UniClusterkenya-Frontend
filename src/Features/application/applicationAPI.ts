@@ -12,10 +12,16 @@ export type TStudent = {
   lastName: string;
 };
 
+export type TUniversity = {
+  universityID: number;
+  name: string;
+};
+
 export type TApplicationProgramme = {
   programmeID: number;
   name: string;
   level?: string | null;
+  university: TUniversity; // <-- include university info
 };
 
 export type TApplication = {
@@ -26,17 +32,17 @@ export type TApplication = {
   status: string;
   clusterScore?: string | null;
   programme: TApplicationProgramme;
-  student: TStudent; // <-- NEW: include student info
+  student: TStudent;
 };
 
-// Payload for creating an application
+/* Payloads for create/update remain the same */
+
 export type TCreateApplicationPayload = {
-  userID: number; // backend supports userID or studentID
+  userID: number;
   programmeID: number;
   choiceOrder: number;
 };
 
-// Payload for updating application
 export type TUpdateApplicationPayload = {
   applicationID: number;
   updates: Partial<{
@@ -46,7 +52,6 @@ export type TUpdateApplicationPayload = {
   }>;
 };
 
-// Application window type
 export type TApplicationWindow = {
   windowID: number;
   name: string;
@@ -55,7 +60,6 @@ export type TApplicationWindow = {
   isActive: boolean;
 };
 
-// Cluster subject for validation
 export type TClusterSubject = {
   id: number;
   subjectCode: string;
@@ -81,9 +85,6 @@ export const applicationAPI = createApi({
   }),
   tagTypes: ["Applications", "ApplicationWindows", "ClusterSubjects"],
   endpoints: (builder) => ({
-    /* =============================
-       APPLICATION QUERIES
-    ============================= */
     getAllApplications: builder.query<TApplication[], void>({
       query: () => "/application",
       transformResponse: (res: { data: TApplication[] }) => res.data,
@@ -102,16 +103,12 @@ export const applicationAPI = createApi({
       providesTags: ["Applications"],
     }),
 
-    // Fetch cluster subjects for a programme
     getProgrammeClusterSubjects: builder.query<TClusterSubject[], number>({
       query: (programmeID) => `/programmes/${programmeID}/clusters-with-subjects`,
       transformResponse: (res: { data: TClusterSubject[] }) => res.data,
       providesTags: ["ClusterSubjects"],
     }),
 
-    /* =============================
-       APPLICATION MUTATIONS
-    ============================= */
     createApplication: builder.mutation<
       { message: string; data: TApplication },
       TCreateApplicationPayload
@@ -144,9 +141,6 @@ export const applicationAPI = createApi({
       invalidatesTags: ["Applications"],
     }),
 
-    /* =============================
-       APPLICATION WINDOW QUERIES
-    ============================= */
     getAllApplicationWindows: builder.query<TApplicationWindow[], void>({
       query: () => "/application-window",
       transformResponse: (res: { data: TApplicationWindow[] }) => res.data,

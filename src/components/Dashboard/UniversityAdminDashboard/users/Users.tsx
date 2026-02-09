@@ -1,10 +1,14 @@
-// src/components/Dashboard/AdminDashboard/ManageUsers/Users.tsx
-
 import React, { useState } from "react";
 import { FaUsers, FaEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { RiCloseCircleFill } from "react-icons/ri";
-import { Mail, ShieldCheck, School } from "lucide-react";
+import {
+  Mail,
+  ShieldCheck,
+  School,
+  User,
+  GraduationCap,
+} from "lucide-react";
 import { Skeleton } from "../../../../components/ui/skeleton";
 import {
   userAPI,
@@ -15,10 +19,13 @@ import UpdateUser from "./UpdateUser";
 import DeleteUser from "./DeleteUser";
 
 const UsersComponent: React.FC = () => {
-  const { data: usersData, isLoading, error } =
-    userAPI.useGetUsersQuery(undefined, {
-      refetchOnMountOrArgChange: true,
-    });
+  const {
+    data: usersData,
+    isLoading,
+    error,
+  } = userAPI.useGetUsersQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const [selectedUser, setSelectedUser] = useState<TUser | null>(null);
   const [userToDelete, setUserToDelete] = useState<TUser | null>(null);
@@ -99,7 +106,7 @@ const UsersComponent: React.FC = () => {
               key={user.userID}
               className="group bg-white rounded-3xl border border-gray-100 shadow-md hover:shadow-xl transition-all p-6"
             >
-              {/* Header */}
+              {/* Card Header */}
               <div className="flex items-start justify-between mb-5">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-bold text-gray-800 truncate group-hover:text-indigo-700">
@@ -134,28 +141,59 @@ const UsersComponent: React.FC = () => {
               </div>
 
               {/* Details */}
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 text-sm text-gray-700">
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-700 truncate">
-                    {user.email}
-                  </span>
+                  <span className="truncate">{user.email}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-700">
+                  <span>
                     {user.isVerified ? "Verified Account" : "Not Verified"}
                   </span>
                 </div>
 
+                {user.gender && (
+                  <div className="flex items-center gap-3">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <span>{user.gender}</span>
+                  </div>
+                )}
+
                 {user.highSchool && (
                   <div className="flex items-center gap-3">
                     <School className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">
-                      {user.highSchool}
-                    </span>
+                    <span>{user.highSchool}</span>
                   </div>
+                )}
+
+                {/* Student-only academic info */}
+                {user.role === "student" && (
+                  <>
+                    {user.kcseIndex && (
+                      <div className="flex items-center gap-3">
+                        <GraduationCap className="h-4 w-4 text-gray-500" />
+                        <span>KCSE Index: {user.kcseIndex}</span>
+                      </div>
+                    )}
+
+                    {user.meanGrade && (
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium text-gray-500">
+                          Mean Grade:
+                        </span>
+                        <span>{user.meanGrade}</span>
+                      </div>
+                    )}
+
+                    {typeof user.agp === "number" && (
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium text-gray-500">AGP:</span>
+                        <span>{user.agp}</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

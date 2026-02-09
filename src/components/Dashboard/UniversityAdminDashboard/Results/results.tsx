@@ -23,6 +23,9 @@ const ResultsComponent: React.FC = () => {
   const [selectedResult, setSelectedResult] = useState<TKcseSubjectResult | null>(null);
   const [resultToDelete, setResultToDelete] = useState<TKcseSubjectResult | null>(null);
 
+  // ✅ Control Create Results modal
+  const [showCreate, setShowCreate] = useState(false);
+
   const handleEdit = (result: TKcseSubjectResult) => {
     setSelectedResult(result);
     (document.getElementById("update_results_modal") as HTMLDialogElement)?.showModal();
@@ -31,6 +34,13 @@ const ResultsComponent: React.FC = () => {
   const handleDelete = (result: TKcseSubjectResult) => {
     setResultToDelete(result);
     (document.getElementById("delete_results_modal") as HTMLDialogElement)?.showModal();
+  };
+
+  const handleCreateOpen = () => {
+    setShowCreate(true);
+    setTimeout(() => {
+      (document.getElementById("create_results_modal") as HTMLDialogElement)?.showModal();
+    }, 0);
   };
 
   // Group results by student (userID)
@@ -51,7 +61,7 @@ const ResultsComponent: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 p-6 rounded-2xl">
       {/* Modals */}
-      <CreateResults />
+      {showCreate && <CreateResults />}
       <UpdateResults {...({ result: selectedResult } as any)} />
       <DeleteResults {...({ result: resultToDelete } as any)} />
 
@@ -76,9 +86,7 @@ const ResultsComponent: React.FC = () => {
           </div>
 
           <button
-            onClick={() =>
-              (document.getElementById("create_results_modal") as HTMLDialogElement)?.showModal()
-            }
+            onClick={handleCreateOpen}
             className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition"
           >
             + Add Result
@@ -197,7 +205,7 @@ const ResultsComponent: React.FC = () => {
             <FaGraduationCap size={72} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700">No results available</h3>
             <p className="text-gray-500 mt-2">
-              Add KCSE results to get started
+              Click “Add Result” to get started
             </p>
           </div>
         )

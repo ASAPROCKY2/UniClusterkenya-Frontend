@@ -11,7 +11,7 @@ const UniversityHeader: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const isHomePage = location.pathname === "/university";
+  const isHomePage = location.pathname === "/admin/dashboard";
 
   // Function to check if a menu link is active
   const isActive = (path: string): boolean => location.pathname === path;
@@ -36,7 +36,7 @@ const UniversityHeader: React.FC = () => {
         )}
 
         <Link
-          to="/university"
+          to="/admin/dashboard"
           className="flex items-center gap-3 hover:opacity-90 transition"
         >
           <img src={logo} alt="UniCluster Logo" className="h-12 lg:h-14 w-auto" />
@@ -51,40 +51,40 @@ const UniversityHeader: React.FC = () => {
         <ul className="menu menu-horizontal px-1">
           <li>
             <Link
-              to="/university"
-              className={isActive("/university") ? "text-primary" : ""}
+              to="/admin/dashboard"
+              className={isActive("/admin/dashboard") ? "text-primary" : ""}
             >
               Dashboard
             </Link>
           </li>
           <li>
             <Link
-              to="/university/programs"
-              className={isActive("/university/programs") ? "text-primary" : ""}
+              to="/admin/programs"
+              className={isActive("/admin/programs") ? "text-primary" : ""}
             >
               Programs
             </Link>
           </li>
           <li>
             <Link
-              to="/university/manage"
-              className={isActive("/university/manage") ? "text-primary" : ""}
+              to="/admin/universities"
+              className={isActive("/admin/universities") ? "text-primary" : ""}
             >
               Universities
             </Link>
           </li>
           <li>
             <Link
-              to="/university/applications"
-              className={isActive("/university/applications") ? "text-primary" : ""}
+              to="/admin/applications"
+              className={isActive("/admin/applications") ? "text-primary" : ""}
             >
               Applications
             </Link>
           </li>
           <li>
             <Link
-              to="/university/students"
-              className={isActive("/university/students") ? "text-primary" : ""}
+              to="/admin/users"
+              className={isActive("/admin/users") ? "text-primary" : ""}
             >
               Students
             </Link>

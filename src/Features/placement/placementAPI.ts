@@ -1,4 +1,3 @@
-// src/features/placements/placementAPI.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../../utilis/APiDomain";
 import type { RootState } from "../../app/store";
@@ -16,21 +15,30 @@ export type TPlacementProgramme = {
   programmeID: number;
   name: string;
   level?: string | null;
-  university?: TPlacementUniversity | null;
+  university?: TPlacementUniversity | null; // <-- added
+};
+
+export type TPlacementStudent = {
+  userID: number;
+  firstName: string;
+  lastName: string;
 };
 
 export type TPlacement = {
   placementID: number;
-  userID: number;
   placementStatus: string;
   placementDate?: string | null;
   programme: TPlacementProgramme;
+  student?: TPlacementStudent | null;
+  university?: TPlacementUniversity | null;
 };
 
 export type TCreatePlacementPayload = {
   userID: number;
   programmeID: number;
-  placementStatus?: string;
+  universityID: number;
+  applicationID: number;
+  year: number;
   placementDate?: string;
 };
 
@@ -38,8 +46,9 @@ export type TUpdatePlacementPayload = {
   placementID: number;
   updates: Partial<{
     programmeID: number;
-    placementStatus: string;
+    universityID: number;
     placementDate: string;
+    placementStatus: string;
   }>;
 };
 
@@ -52,54 +61,30 @@ export const placementAPI = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState & {
-        auth?: { token?: string };
-      })?.auth?.token;
-
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-
+      const token = (getState() as RootState & { auth?: { token?: string } })?.auth?.token;
+      if (token) headers.set("Authorization", `Bearer ${token}`);
       headers.set("Content-Type", "application/json");
       return headers;
     },
   }),
   tagTypes: ["Placements"],
   endpoints: (builder) => ({
-    /* =============================
-       QUERIES
-    ============================= */
-
-    // Admin – all placements
     getAllPlacements: builder.query<TPlacement[], void>({
       query: () => "/placement",
       transformResponse: (res: { data: TPlacement[] }) => res.data,
       providesTags: ["Placements"],
     }),
-
-    // Single placement
     getPlacementById: builder.query<TPlacement, number>({
       query: (placementID) => `/placement/${placementID}`,
       transformResponse: (res: { data: TPlacement }) => res.data,
       providesTags: ["Placements"],
     }),
-
-    // Student placements
     getPlacementsByUserId: builder.query<TPlacement[], number>({
       query: (userID) => `/placement/student/${userID}`,
       transformResponse: (res: { data: TPlacement[] }) => res.data,
       providesTags: ["Placements"],
     }),
-
-    /* =============================
-       MUTATIONS
-    ============================= */
-
-    // Manual placement
-    createPlacement: builder.mutation<
-      { message: string; data: TPlacement },
-      TCreatePlacementPayload
-    >({
+    createPlacement: builder.mutation<{ message: string; data: TPlacement }, TCreatePlacementPayload>({
       query: (payload) => ({
         url: "/placement",
         method: "POST",
@@ -107,24 +92,14 @@ export const placementAPI = createApi({
       }),
       invalidatesTags: ["Placements"],
     }),
-
-    // ⭐ AUTO PLACEMENT (NEW)
-    autoPlacement: builder.mutation<
-      { message: string; data?: TPlacement[] },
-      void
-    >({
-      query: () => ({
-        url: "/placement/auto",
+    autoPlacement: builder.mutation<{ message: string; data?: TPlacement[] }, { year: number }>({
+      query: ({ year }) => ({
+        url: `/placement/auto?year=${year}`,
         method: "POST",
       }),
       invalidatesTags: ["Placements"],
     }),
-
-    // Update placement
-    updatePlacement: builder.mutation<
-      { message: string },
-      TUpdatePlacementPayload
-    >({
+    updatePlacement: builder.mutation<{ message: string }, TUpdatePlacementPayload>({
       query: ({ placementID, updates }) => ({
         url: `/placement/${placementID}`,
         method: "PUT",
@@ -132,8 +107,6 @@ export const placementAPI = createApi({
       }),
       invalidatesTags: ["Placements"],
     }),
-
-    // Delete placement
     deletePlacement: builder.mutation<{ message: string }, number>({
       query: (placementID) => ({
         url: `/placement/${placementID}`,
@@ -147,13 +120,12 @@ export const placementAPI = createApi({
 /* =============================
    EXPORT HOOKS
 ============================= */
-
 export const {
   useGetAllPlacementsQuery,
   useGetPlacementByIdQuery,
   useGetPlacementsByUserIdQuery,
   useCreatePlacementMutation,
-  useAutoPlacementMutation, 
+  useAutoPlacementMutation,
   useUpdatePlacementMutation,
   useDeletePlacementMutation,
 } = placementAPI;

@@ -21,7 +21,8 @@ import { programmesAPI } from "../Features/programmes/ProgrammesAPI";
 import { placementAPI } from "../Features/placement/placementAPI";
 import { applicationAPI } from "../Features/application/applicationAPI";
 import { clusterAPI } from "../Features/Cluster/clusterAPI";
-import { applicationWindowAPI } from "../Features/ApplicationWindow/applicationWindowAPI"; 
+import { applicationWindowAPI } from "../Features/ApplicationWindow/applicationWindowAPI";
+import { dashboardAPI } from "../Features/dashboard/DashbaordAPI"; 
 
 // ===== REDUCERS =====
 import userReducer from "../Features/Login/UserSlice";
@@ -51,7 +52,8 @@ const rootReducer = combineReducers({
   [placementAPI.reducerPath]: placementAPI.reducer,
   [applicationAPI.reducerPath]: applicationAPI.reducer,
   [clusterAPI.reducerPath]: clusterAPI.reducer,
-  [applicationWindowAPI.reducerPath]: applicationWindowAPI.reducer, // NEW: Application Window reducer
+  [applicationWindowAPI.reducerPath]: applicationWindowAPI.reducer,
+  [dashboardAPI.reducerPath]: dashboardAPI.reducer, 
 
   // Persisted slices
   user: userReducer,
@@ -90,7 +92,8 @@ export const store = configureStore({
       placementAPI.middleware,
       applicationAPI.middleware,
       clusterAPI.middleware,
-      applicationWindowAPI.middleware // NEW: Application Window middleware
+      applicationWindowAPI.middleware,
+      dashboardAPI.middleware //  Added Dashboard Middleware
     ),
 });
 
